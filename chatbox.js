@@ -4,6 +4,9 @@ class Chatbox {
     this.contact = options.contact || {};
     this.initialMessages = options.initialMessages || [];
     this.context = options.context || "";
+    this.secretChatId = options.secret_chat_id;
+
+    console.log("Chatbox initialized with secretChatId:", this.secretChatId);
 
     this.createChatbox();
     this.initMessages();
@@ -11,34 +14,81 @@ class Chatbox {
   }
 
   async fetchChatboxConfig() {
-    const response = await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          mainColor: "red",
-          chatbotIcon: "../img/agent-awatar.svg",
-          widgetIcon: "../img/widget-icon.svg",
-        });
-      }, 1000);
-    });
+    console.log(
+      "Fetching chatbox config with secretChatId:",
+      this.secretChatId
+    );
 
-    // Update colors and icons
-    const { mainColor, chatbotIcon, widgetIcon } = response;
+    const response = await fetch(
+      "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ secret_key: this.secretChatId }),
+      }
+    );
 
+    if (!response.ok) {
+      console.error("Failed to fetch chatbox config");
+      return;
+    }
+
+    const data = await response.json();
+    console.log("Fetched data:", data);
+
+    const {
+      style: { icon_bot, icon_widget, main_color },
+      start_message,
+      predefined_answers,
+    } = data;
+
+    console.log(icon_widget, "icon_widget");
+
+    const sendButton = this.chatboxElement.querySelector("#sendButton img");
+    if (sendButton) {
+      sendButton.style.path = main_color;
+    }
     // Update main color
-    document.documentElement.style.setProperty("--main-color", mainColor);
+    document.documentElement.style.setProperty("--main-color", main_color);
 
-    // Update styles
-    this.chatboxElement.querySelector(".chatbox-header").style.backgroundColor =
-      mainColor;
-    this.chatboxElement.querySelector(
-      ".chatbox-message.bot"
-    ).style.backgroundColor = mainColor;
+    // Get elements
+    const chatboxHeader = this.chatboxElement.querySelector(".chatbox-header");
+    const agentAvatar = this.chatboxElement.querySelector(".agent-avatar");
+    const chatButton = this.chatButton;
 
-    // Update avatar icon
-    this.chatboxElement.querySelector(".agent-avatar").src = chatbotIcon;
+    // Check if elements exist before updating styles
+    if (chatboxHeader) {
+      chatboxHeader.style.backgroundColor = main_color;
+    } else {
+      console.error(".chatbox-header not found");
+    }
 
-    // Update widget icon
-    this.chatButton.style.backgroundImage = `url(${widgetIcon})`;
+    if (agentAvatar) {
+      agentAvatar.src = icon_bot;
+    } else {
+      console.error(".agent-avatar not found");
+    }
+
+    if (chatButton) {
+      chatButton.style.backgroundImage = `url(${icon_widget})`;
+    } else {
+      console.error("#chatButton not found");
+    }
+
+    // Save bot icon URL
+    this.iconBot = icon_bot;
+
+    // Display start_message
+    if (start_message && start_message.length > 0) {
+      this.addMessage("bot", start_message[0].message, this.iconBot);
+    }
+
+    // Display predefined_answers as buttons
+    if (predefined_answers && predefined_answers.length > 0) {
+      this.displayPredefinedAnswers(predefined_answers);
+    }
   }
 
   createChatbox() {
@@ -97,23 +147,110 @@ class Chatbox {
     });
   }
 
-  addMessage(from, message) {
+  addMessage(from, message, iconUrl) {
+    const messageContainer = document.createElement("div");
+    messageContainer.className = `chatbox-message-container ${from}`;
+
+    if (from === "bot" && iconUrl) {
+      const icon = document.createElement("img");
+      icon.src = iconUrl;
+      icon.className = "bot-icon";
+      messageContainer.appendChild(icon);
+    }
+
     const messageElement = document.createElement("div");
     messageElement.className = `chatbox-message ${from}`;
     messageElement.innerText = message;
-    this.chatMessages.appendChild(messageElement);
+
+    messageContainer.appendChild(messageElement);
+    this.chatMessages.appendChild(messageContainer);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  }
+
+  displayPredefinedAnswers(answers) {
+    answers.forEach((answer) => {
+      const button = document.createElement("button");
+      button.className = "chatbox-predefined-answer";
+      button.innerText = answer.question;
+      button.addEventListener("click", () => {
+        this.handlePredefinedAnswerClick(answer);
+      });
+      this.chatMessages.appendChild(button);
+    });
+  }
+
+  async handlePredefinedAnswerClick(answer) {
+    // Add user message
+    this.addMessage("user", answer.question);
+
+    // Add typing animation
+    const typingMessage = document.createElement("div");
+    typingMessage.className = "chatbox-message bot typing";
+    typingMessage.innerText = "Bot is typing";
+    this.chatMessages.appendChild(typingMessage);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+
+    // Simulate delay for typing animation
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Remove typing animation
+    typingMessage.remove();
+
+    // Add bot response
+    this.addMessage("bot", answer.answer, this.iconBot);
   }
 
   async sendMessage() {
     const message = this.chatInput.value;
     if (!message) return;
-
+  
     this.addMessage("user", message);
     this.chatInput.value = "";
+  
+    // Add typing animation
+    const typingMessage = document.createElement("div");
+    typingMessage.className = "chatbox-message-container bot typing-container";
+    const typingElement = document.createElement("div");
+    typingElement.className = "chatbox-message bot typing";
+    typingElement.innerText = ".";
+    typingMessage.appendChild(typingElement);
+    this.chatMessages.appendChild(typingMessage);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  
+    const botResponse = await this.getBotResponse(this.secretChatId, message);
+  
+    // Remove typing animation
+    typingMessage.remove();
+  
+    this.addMessage("bot", botResponse, this.iconBot);
+  }
 
-    // Simulate bot response for testing purposes
-    this.addMessage("bot", `You said: ${message}`);
+  async getBotResponse(secretKey, message) {
+    try {
+      const response = await fetch(
+        "https://smilebot-sk-1.onrender.com/api/chat-bot/do-request-chat-gpt/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            secret_key: secretKey,
+            message: message,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.response;
+    } catch (error) {
+      console.error("Failed to get bot response:", error);
+      return "Sorry, I couldn't process your request at the moment.";
+    }
   }
 }
 
@@ -161,11 +298,26 @@ styles.innerHTML = `
         width: 30px;
         height: 30px;
         margin-right: 10px;
+        border-radius: 50%;
       }
 
       .chatbox-header-avatar-wrapper{
         display: flex;
         align-items: center;
+      }
+
+      .chatbox-message-container {
+        display: flex;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      
+      .chatbox-message-container.bot {
+        justify-content: flex-start;
+      }
+      
+      .chatbox-message-container.user {
+        justify-content: flex-end;
       }
     
       .chatbox-messages {
@@ -239,6 +391,18 @@ styles.innerHTML = `
         background-position: center;
       }
     
+      .chatbox-message.user {
+        text-align: right;
+        background: #eee;
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        max-width: 70%;
+        align-self: flex-end;
+        font-size: 12px;
+      }
+      
       .chatbox-message.bot {
         text-align: left;
         background: var(--main-color);
@@ -246,22 +410,76 @@ styles.innerHTML = `
         padding: 5px 10px;
         border-radius: 10px;
         margin-bottom: 12px;
-        width: fit-content;
+        min-width: 15px;
+        max-width: fit-content;
+        align-self: flex-start;
         font-size: 12px;
       }
-    
-      .chatbox-message.user {
-        text-align: right;
-        background: #F8F8F8;
-        color: #000000;
+      
+
+      .chatbox-predefined-answer {
+        background: transparent;
+        color: white;
+        border: 1px solid var(--main-color);
         padding: 5px 10px;
-        border-radius: 10px;
-        margin-bottom: 5px;
+        color: var(--main-color);
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
         font-size: 12px;
-        width: fit-content;
-        margin-left: auto;
+      }
+
+      .typing::after {
+        content: ".";
+        animation: dots 1s steps(5, end) infinite;
+      }
+      
+      @keyframes dots {
+        0%, 20% {
+          color: transparent;
+          text-shadow: .25em 0 0 transparent, .5em 0 0 transparent;
+        }
+        40% {
+          color: #fff;
+          text-shadow: .25em 0 0 #fff, .5em 0 0 transparent;
+        }
+        60% {
+          text-shadow: .25em 0 0 #fff, .5em 0 0 #fff;
+        }
+        80%, 100% {
+          text-shadow: .25em 0 0 #fff, .5em 0 0 #fff;
+        }
+      }
+      
+
+      .bot-icon {
+        width: 30px; /* Розмір іконки */
+        height: 30px; /* Розмір іконки */
+        margin-right: 10px; /* Відступ від повідомлення */
+        border-radius: 50%;
+      }
+
+      @keyframes typing {
+        0% {
+          width: 5px;
+          height: 5px;
+          background-color: #fff;
+        }
+        33% {
+          width: 5px;
+          height: 5px;
+          background-color: #fff;
+        }
+        66% {
+          width: 5px;
+          height: 5px;
+          background-color: #fff;
+        }
+        100% {
+          width: 5px;
+          height: 5px;
+          background-color: #fff;
+        }
       }
     `;
 document.head.appendChild(styles);
-
-console.log("chatbox.js loaded");
