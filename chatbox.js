@@ -8,6 +8,7 @@ const agentAvatarPath =
 const closeIconPath = "https://codecrafted1.github.io/smilebot/img/close.svg";
 const sendIconPath = "https://codecrafted1.github.io/smilebot/img/send.svg";
 const logoPath = "https://codecrafted1.github.io/smilebot/img/logo.svg";
+const reload = "https://codecrafted1.github.io/smilebot/img/reload.svg";
 
 class Chatbox {
   constructor(options) {
@@ -18,20 +19,12 @@ class Chatbox {
     this.secretChatId = options.secret_chat_id;
     this.currentUUID = currentUUID;
 
-    console.log(currentUUID, "currentUUID");
-    // console.log("Chatbox initialized with secretChatId:", this.secretChatId);
-
     this.createChatbox();
     this.initMessages();
     this.fetchChatboxConfig();
   }
 
   async fetchChatboxConfig() {
-    // console.log(
-    //   "Fetching chatbox config with secretChatId:",
-    //   this.secretChatId
-    // );
-
     const response = await fetch(
       "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
       {
@@ -52,15 +45,11 @@ class Chatbox {
     }
 
     const data = await response.json();
-    // console.log("Fetched data:", data);
-
     const {
       style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
       start_message,
       predefined_answers,
     } = data;
-
-    // console.log(icon_widget, "icon_widget");
 
     const sendButton = this.chatboxElement.querySelector("#sendButton img");
     if (sendButton) {
@@ -113,11 +102,14 @@ class Chatbox {
     this.chatboxElement.className = "chatbox-container";
     this.chatboxElement.innerHTML = `
       <div class="chatbox-header">
+        <div class="chatbox-header-buttons">
+          <button class="close-button"><img src="${closeIconPath}" alt="close"></button>
+          <button class="reload-button"><img src="${reload}" alt="Reload"></button>
+        </div>
         <div class="chatbox-header-avatar-wrapper">
           <img src="${agentAvatarPath}" alt="Agent" class="agent-avatar">
           <span>Adam</span>
         </div>
-        <button class="close-button"><img src="${closeIconPath}" alt="close"></button>
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
       <div class="chatbox-input">
@@ -140,6 +132,7 @@ class Chatbox {
     this.chatInput = this.chatboxElement.querySelector("#chatInput");
     this.sendButton = this.chatboxElement.querySelector("#sendButton");
     this.closeButton = this.chatboxElement.querySelector(".close-button");
+    this.reloadButton = this.chatboxElement.querySelector(".reload-button");
 
     this.sendButton.addEventListener("click", () => this.sendMessage());
     this.chatInput.addEventListener("keypress", (e) => {
@@ -150,12 +143,20 @@ class Chatbox {
       this.chatButton.style.display = "flex";
     });
 
+    this.reloadButton.addEventListener("click", () => this.reloadChatbox());
+
     this.chatButton.addEventListener("click", () => {
       this.chatboxElement.style.display = "flex";
       this.chatButton.style.display = "none";
     });
 
     this.chatboxElement.style.display = "none";
+  }
+
+  reloadChatbox() {
+    this.chatMessages.innerHTML = "";
+    this.fetchChatboxConfig();
+    this.initMessages();
   }
 
   initMessages() {
@@ -301,6 +302,7 @@ styles.innerHTML = `
         color: white;
         padding: 15px;
         display: flex;
+        flex-direction: row-reverse;
         justify-content: space-between;
         align-items: center;
         border-top-left-radius: 10px;
@@ -310,6 +312,24 @@ styles.innerHTML = `
       .close-button{
           background: transparent;
           border: none;
+      }
+
+      .reload-button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+      
+      .reload-button img {
+        width: 10px;
+        height: 10px;
+      }
+
+      .chatbox-header-buttons{
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
       }
     
       .agent-avatar {
