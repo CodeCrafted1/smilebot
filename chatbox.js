@@ -1,7 +1,7 @@
-import { v4 as uuidv4 } from "uuid";
+import { generateUUID } from "./uuid.js";
 
 // Створення нового UUID при завантаженні сторінки
-const currentUUID = uuidv4();
+const currentUUID = generateUUID();
 
 const agentAvatarPath =
   "https://codecrafted1.github.io/smilebot/img/agent-avatar.svg";
@@ -18,7 +18,7 @@ class Chatbox {
     this.secretChatId = options.secret_chat_id;
     this.currentUUID = currentUUID;
 
-    console.log(currentUUID, 'currentUUID')
+    console.log(currentUUID, "currentUUID");
     // console.log("Chatbox initialized with secretChatId:", this.secretChatId);
 
     this.createChatbox();
