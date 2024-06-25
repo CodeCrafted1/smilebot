@@ -18,6 +18,7 @@ class Chatbox {
     this.context = options.context || "";
     this.secretChatId = options.secret_chat_id;
     this.currentUUID = currentUUID;
+    this.name_chat_bot = options.name_chat_bot;
 
     this.createChatbox();
     this.initMessages();
@@ -108,7 +109,7 @@ class Chatbox {
         </div>
         <div class="chatbox-header-avatar-wrapper">
           <img src="${agentAvatarPath}" alt="Agent" class="agent-avatar">
-          <span>Adam</span>
+          <span>${name_chat_bot}</span>
         </div>
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
