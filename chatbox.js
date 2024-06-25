@@ -41,7 +41,7 @@ class Chatbox {
         },
         body: JSON.stringify({
           secret_key: this.secretChatId,
-          uuid: this.currentUUID,
+          user_uuid: this.currentUUID,
         }),
       }
     );
@@ -254,7 +254,7 @@ class Chatbox {
           body: JSON.stringify({
             secret_key: secretKey,
             message: message,
-            uuid: this.currentUUID,
+            user_uuid: this.currentUUID,
           }),
         }
       );
