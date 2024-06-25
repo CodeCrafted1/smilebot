@@ -95,22 +95,22 @@ class Chatbox {
     this.chatboxElement = document.createElement("div");
     this.chatboxElement.className = "chatbox-container";
     this.chatboxElement.innerHTML = `
-          <div class="chatbox-header">
-            <div class="chatbox-header-avatar-wrapper">
-              <img src="agent-avatar.png" alt="Agent" class="agent-avatar">
-              <span>Adam</span>
-            </div>
-            <button class="close-button"><img src="../img/close.svg" alt="close"></button>
-          </div>
-          <div id="chatMessages" class="chatbox-messages"></div>
-          <div class="chatbox-input">
-            <input type="text" id="chatInput" placeholder="Type a message..." />
-            <button id="sendButton"><img src="../img/send.svg" alt="Send"></button>
-          </div>
-          <div class="chatbox-footer">
-            <img src="../img/logo.svg" alt="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
-          </div>
-        `;
+      <div class="chatbox-header">
+        <div class="chatbox-header-avatar-wrapper">
+          <img src="./img/agent-avatar.svg" alt="Agent" class="agent-avatar">
+          <span>Adam</span>
+        </div>
+        <button class="close-button"><img src="./img/close.svg" alt="close"></button>
+      </div>
+      <div id="chatMessages" class="chatbox-messages"></div>
+      <div class="chatbox-input">
+        <input type="text" id="chatInput" placeholder="Type a message..." />
+        <button id="sendButton"><img src="./img/send.svg" alt="Send"></button>
+      </div>
+      <div class="chatbox-footer">
+        <img src="./img/logo.svg" alt="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+      </div>
+    `;
 
     this.chatButton = document.createElement("button");
     this.chatButton.id = "chatButton";
@@ -203,10 +203,10 @@ class Chatbox {
   async sendMessage() {
     const message = this.chatInput.value;
     if (!message) return;
-  
+
     this.addMessage("user", message);
     this.chatInput.value = "";
-  
+
     // Add typing animation
     const typingMessage = document.createElement("div");
     typingMessage.className = "chatbox-message-container bot typing-container";
@@ -216,12 +216,12 @@ class Chatbox {
     typingMessage.appendChild(typingElement);
     this.chatMessages.appendChild(typingMessage);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-  
+
     const botResponse = await this.getBotResponse(this.secretChatId, message);
-  
+
     // Remove typing animation
     typingMessage.remove();
-  
+
     this.addMessage("bot", botResponse, this.iconBot);
   }
 
