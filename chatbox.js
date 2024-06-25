@@ -319,7 +319,7 @@ styles.innerHTML = `
         background: transparent;
         border: none;
         cursor: pointer;
-        margin-left: 10px;
+        margin-right: 10px;
       }
       
       .reload-button img {
