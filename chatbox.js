@@ -1,4 +1,8 @@
-// Paths should be relative to the location of chatbox.js when accessed through the GitHub Pages URL
+import { v4 as uuidv4 } from "uuid";
+
+// Створення нового UUID при завантаженні сторінки
+const currentUUID = uuidv4();
+
 const agentAvatarPath =
   "https://codecrafted1.github.io/smilebot/img/agent-avatar.svg";
 const closeIconPath = "https://codecrafted1.github.io/smilebot/img/close.svg";
@@ -12,8 +16,10 @@ class Chatbox {
     this.initialMessages = options.initialMessages || [];
     this.context = options.context || "";
     this.secretChatId = options.secret_chat_id;
+    this.currentUUID = currentUUID;
 
-    console.log("Chatbox initialized with secretChatId:", this.secretChatId);
+    console.log(currentUUID, 'currentUUID')
+    // console.log("Chatbox initialized with secretChatId:", this.secretChatId);
 
     this.createChatbox();
     this.initMessages();
@@ -21,10 +27,10 @@ class Chatbox {
   }
 
   async fetchChatboxConfig() {
-    console.log(
-      "Fetching chatbox config with secretChatId:",
-      this.secretChatId
-    );
+    // console.log(
+    //   "Fetching chatbox config with secretChatId:",
+    //   this.secretChatId
+    // );
 
     const response = await fetch(
       "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
@@ -33,7 +39,10 @@ class Chatbox {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ secret_key: this.secretChatId }),
+        body: JSON.stringify({
+          secret_key: this.secretChatId,
+          uuid: this.currentUUID,
+        }),
       }
     );
 
@@ -43,7 +52,7 @@ class Chatbox {
     }
 
     const data = await response.json();
-    console.log("Fetched data:", data);
+    // console.log("Fetched data:", data);
 
     const {
       style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
@@ -51,7 +60,7 @@ class Chatbox {
       predefined_answers,
     } = data;
 
-    console.log(icon_widget, "icon_widget");
+    // console.log(icon_widget, "icon_widget");
 
     const sendButton = this.chatboxElement.querySelector("#sendButton img");
     if (sendButton) {
@@ -245,6 +254,7 @@ class Chatbox {
           body: JSON.stringify({
             secret_key: secretKey,
             message: message,
+            uuid: this.currentUUID,
           }),
         }
       );
