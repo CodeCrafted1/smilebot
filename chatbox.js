@@ -1,3 +1,10 @@
+// Paths should be relative to the location of chatbox.js when accessed through the GitHub Pages URL
+const agentAvatarPath =
+  "https://codecrafted1.github.io/smilebot/img/agent-avatar.svg";
+const closeIconPath = "https://codecrafted1.github.io/smilebot/img/close.svg";
+const sendIconPath = "https://codecrafted1.github.io/smilebot/img/send.svg";
+const logoPath = "https://codecrafted1.github.io/smilebot/img/logo.svg";
+
 class Chatbox {
   constructor(options) {
     this.agentId = options.agentId;
@@ -39,7 +46,7 @@ class Chatbox {
     console.log("Fetched data:", data);
 
     const {
-      style: { icon_bot, icon_widget, main_color },
+      style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
       start_message,
       predefined_answers,
     } = data;
@@ -50,6 +57,7 @@ class Chatbox {
     if (sendButton) {
       sendButton.style.path = main_color;
     }
+
     // Update main color
     document.documentElement.style.setProperty("--main-color", main_color);
 
@@ -97,18 +105,18 @@ class Chatbox {
     this.chatboxElement.innerHTML = `
       <div class="chatbox-header">
         <div class="chatbox-header-avatar-wrapper">
-          <img src="./img/agent-avatar.svg" alt="Agent" class="agent-avatar">
+          <img src="${agentAvatarPath}" alt="Agent" class="agent-avatar">
           <span>Adam</span>
         </div>
-        <button class="close-button"><img src="./img/close.svg" alt="close"></button>
+        <button class="close-button"><img src="${closeIconPath}" alt="close"></button>
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
       <div class="chatbox-input">
         <input type="text" id="chatInput" placeholder="Type a message..." />
-        <button id="sendButton"><img src="./img/send.svg" alt="Send"></button>
+        <button id="sendButton"><img src="${sendIconPath}" alt="Send"></button>
       </div>
       <div class="chatbox-footer">
-        <img src="./img/logo.svg" alt="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+        <img src="${logoPath}" alt="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
     `;
 
