@@ -19,6 +19,7 @@ class Chatbox {
     this.secretChatId = options.secret_chat_id;
     this.currentUUID = currentUUID;
     this.chatBotName = options.name_chat_bot;
+    this.domainHostName = window.location.hostname;
 
     this.createChatbox();
     this.initMessages();
@@ -236,7 +237,11 @@ class Chatbox {
     this.chatMessages.appendChild(typingMessage);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
 
-    const botResponse = await this.getBotResponse(this.secretChatId, message);
+    const botResponse = await this.getBotResponse(
+      this.secretChatId,
+      message,
+      this.domainHostName
+    );
 
     // Remove typing animation
     typingMessage.remove();
@@ -244,7 +249,7 @@ class Chatbox {
     this.addMessage("bot", botResponse, this.iconBot);
   }
 
-  async getBotResponse(secretKey, message) {
+  async getBotResponse(secretKey, message, domain) {
     try {
       const response = await fetch(
         "https://smilebot-sk-1.onrender.com/api/chat-bot/do-request-chat-gpt/",
@@ -257,6 +262,7 @@ class Chatbox {
             secret_key: secretKey,
             message: message,
             user_uuid: this.currentUUID,
+            domain: domain,
           }),
         }
       );
