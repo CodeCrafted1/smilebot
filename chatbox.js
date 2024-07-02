@@ -515,7 +515,6 @@ styles.innerHTML = `
       .bot-icon {
         width: 14px;
         height: 14px;
-        border-radius: 50%;
       }
 
       @keyframes typing {
