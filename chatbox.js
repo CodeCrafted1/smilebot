@@ -21,8 +21,6 @@ class Chatbox {
     this.chatBotName = options.name_chat_bot;
     this.domainHostName = window.location.hostname;
 
-    this.createChatbox();
-    this.initMessages();
     this.fetchChatboxConfig();
   }
 
@@ -45,6 +43,9 @@ class Chatbox {
       console.error("Failed to fetch chatbox config");
       return;
     }
+
+    this.createChatbox();
+    this.initMessages();
 
     const data = await response.json();
     const {
@@ -109,7 +110,6 @@ class Chatbox {
           <button class="reload-button"><img src="${reload}" alt="Reload"></button>
         </div>
         <div class="chatbox-header-avatar-wrapper">
-          <img src="${agentAvatarPath}" alt="Agent" class="agent-avatar">
           <span>${this.chatBotName}</span>
         </div>
       </div>
@@ -172,10 +172,15 @@ class Chatbox {
     messageContainer.className = `chatbox-message-container ${from}`;
 
     if (from === "bot" && iconUrl) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "icon-wrapper";
+
       const icon = document.createElement("img");
       icon.src = iconUrl;
       icon.className = "bot-icon";
-      messageContainer.appendChild(icon);
+
+      wrapper.appendChild(icon);
+      messageContainer.appendChild(wrapper);
     }
 
     const messageElement = document.createElement("div");
@@ -461,7 +466,6 @@ styles.innerHTML = `
         font-size: 12px;
       }
       
-
       .chatbox-predefined-answer {
         background: transparent;
         color: white;
@@ -495,12 +499,22 @@ styles.innerHTML = `
           text-shadow: .25em 0 0 #fff, .5em 0 0 #fff;
         }
       }
-      
 
+      .icon-wrapper{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        background: #F8F8F8;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        margin-right: 10px;
+      }
+      
       .bot-icon {
-        width: 30px; /* Розмір іконки */
-        height: 30px; /* Розмір іконки */
-        margin-right: 10px; /* Відступ від повідомлення */
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
       }
 
@@ -528,3 +542,5 @@ styles.innerHTML = `
       }
     `;
 document.head.appendChild(styles);
+
+//<img src="${agentAvatarPath}" alt="Agent" class="agent-avatar"> inside class chatbox-header-avatar-wrapper before name
