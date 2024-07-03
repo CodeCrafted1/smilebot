@@ -100,6 +100,39 @@ class Chatbox {
     }
   }
 
+  formatText(message) {
+    // Handle bold text: **text**
+    message = message.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+    // Handle italic text: *text*
+    message = message.replace(/\*(.*?)\*/g, "<i>$1</i>");
+
+    // Handle headings: # Heading
+    message = message.replace(/^#\s(.*$)/gm, "<h1>$1</h1>");
+
+    // Handle unordered list: - List item
+    message = message.replace(/^\s*-\s(.*)$/gm, "<li>$1</li>");
+    message = `<ul>${message}</ul>`;
+
+    // Handle ordered list: 1. List item
+    message = message.replace(/^\s*\d+\.\s(.*)$/gm, "<li>$1</li>");
+    message = `<ol>${message}</ol>`;
+
+    // Handle links: [Link text](url)
+    message = message.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank">$1</a>'
+    );
+
+    // Handle inline code: `code`
+    message = message.replace(/`(.*?)`/g, "<code>$1</code>");
+
+    // Handle blockquotes: > Quote
+    message = message.replace(/^\s*>\s(.*)$/gm, "<blockquote>$1</blockquote>");
+
+    return message;
+  }
+
   createChatbox() {
     this.chatboxElement = document.createElement("div");
     this.chatboxElement.className = "chatbox-container";
@@ -185,7 +218,17 @@ class Chatbox {
 
     const messageElement = document.createElement("div");
     messageElement.className = `chatbox-message ${from}`;
-    messageElement.innerText = message;
+
+    // Check if the message contains ul, ol, li
+    const containsLists = /<ul|<ol|<li/.test(message);
+
+    if (from === "bot" && containsLists) {
+      messageElement.style.padding = "0";
+    } else {
+      messageElement.style.padding = "5px 10px";
+    }
+
+    messageElement.innerHTML = message;
 
     messageContainer.appendChild(messageElement);
     this.chatMessages.appendChild(messageContainer);
@@ -248,10 +291,12 @@ class Chatbox {
       this.domainHostName
     );
 
+    const formattedResponse = this.formatText(botResponse);
+
     // Remove typing animation
     typingMessage.remove();
 
-    this.addMessage("bot", botResponse, this.iconBot);
+    this.addMessage("bot", formattedResponse, this.iconBot);
   }
 
   async getBotResponse(secretKey, message, domain) {
@@ -295,6 +340,12 @@ const styles = document.createElement("style");
 styles.innerHTML = `
       :root {
         --main-color: #f37021; /* Default color */
+      }
+
+      ul, ol {
+        padding: 0;
+        margin-left: 4px;
+        padding-left: 4px;
       }
   
       .chatbox-container {
@@ -457,9 +508,9 @@ styles.innerHTML = `
         text-align: left;
         background: var(--main-color);
         color: white;
-        padding: 5px 10px;
         border-radius: 10px;
         margin-bottom: 12px;
+        padding: 5px 10px;
         min-width: 15px;
         max-width: fit-content;
         align-self: flex-start;
