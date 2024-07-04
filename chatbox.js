@@ -143,16 +143,16 @@ class Chatbox {
           <button class="reload-button"><img src="${reload}" alt="Reload"></button>
         </div>
         <div class="chatbox-header-avatar-wrapper">
-          <span>${this.chatBotName}</span>
+          <span class="chatBotName">${this.chatBotName}</span>
         </div>
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
       <div class="chatbox-input">
         <input type="text" id="chatInput" placeholder="Type a message..." />
-        <button id="sendButton"><img src="${sendIconPath}" alt="Send"></button>
+        <button id="sendButton"><img class="send-button" src="${sendIconPath}" alt="Send"></button>
       </div>
       <div class="chatbox-footer">
-        <img src="${logoPath}" alt="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+        <img src="${logoPath}" alt="logo" class="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
     `;
 
@@ -338,6 +338,7 @@ export function initBubble(options) {
 // Add styles to match the provided screenshot
 const styles = document.createElement("style");
 styles.innerHTML = `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
       :root {
         --main-color: #f37021; /* Default color */
       }
@@ -345,36 +346,55 @@ styles.innerHTML = `
       ul, ol {
         padding: 0;
         margin-left: 4px;
-        padding-left: 4px;
       }
   
       .chatbox-container {
-        width: 300px;
-        height: 400px;
+        width: 450px;
+        height: 600px;
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: 30px;
+        right: 30px;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
       }
     
       .chatbox-header {
         background: var(--main-color);
         color: white;
-        padding: 15px;
+        padding: 20px 15px;
         display: flex;
         flex-direction: row-reverse;
         justify-content: space-between;
         align-items: center;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
       }
   
       .close-button{
           background: transparent;
           border: none;
+      }
+
+      .close-button img {
+        width: 17px;
+        height: 17px;
+      }
+
+      .logo {
+       width: 25px;
+      }
+
+      .send-button {
+         width: 23px;
+         height: 23px;
+        }
+
+      .chatBotName {
+        font-size: 18px;
+        font-weight: 500;
+        font-family: Inter;
       }
 
       .reload-button {
@@ -385,8 +405,8 @@ styles.innerHTML = `
       }
       
       .reload-button img {
-        width: 10px;
-        height: 10px;
+        width: 17px;
+        height: 17px;
       }
 
       .chatbox-header-buttons{
@@ -423,7 +443,7 @@ styles.innerHTML = `
     
       .chatbox-messages {
         flex: 1;
-        padding: 10px;
+        padding: 20px 10px;
         overflow-y: auto;
         background: #fff;
         height: 266px;
@@ -454,7 +474,7 @@ styles.innerHTML = `
         border-radius: 3px;
         position: absolute;
         right: 15px;
-        top: 17px;
+        top: 12px;
       }
     
       .chatbox-footer {
@@ -502,6 +522,7 @@ styles.innerHTML = `
         max-width: 70%;
         align-self: flex-end;
         font-size: 12px;
+        font-family: "Inter"
       }
       
       .chatbox-message.bot {
@@ -515,6 +536,7 @@ styles.innerHTML = `
         max-width: fit-content;
         align-self: flex-start;
         font-size: 12px;
+        font-family: "Inter"
       }
       
       .chatbox-predefined-answer {
@@ -527,6 +549,7 @@ styles.innerHTML = `
         border-radius: 5px;
         cursor: pointer;
         font-size: 12px;
+        font-family: "Inter"
       }
 
       .typing::after {
