@@ -20,6 +20,8 @@ class Chatbox {
     this.currentUUID = currentUUID;
     this.chatBotName = options.name_chat_bot;
     this.domainHostName = window.location.hostname;
+    this.iconWidget = "";
+    this.closeIconPath = "";
 
     this.fetchChatboxConfig();
   }
@@ -71,6 +73,9 @@ class Chatbox {
       predefined_answers,
     } = data;
 
+    this.iconWidget = icon_widget;
+    this.closeIconPath = closeIconPath;
+
     const sendButton = this.chatboxElement.querySelector("#sendButton img");
     if (sendButton) {
       sendButton.style.path = main_color;
@@ -99,6 +104,9 @@ class Chatbox {
 
     if (chatButton) {
       chatButton.style.backgroundImage = `url(${icon_widget})`;
+      chatButton.style.backgroundSize = "24px 24px";
+      chatButton.style.backgroundPosition = "center";
+      chatButton.style.backgroundRepeat = "no-repeat";
     } else {
       console.error("#chatButton not found");
     }
@@ -151,12 +159,15 @@ class Chatbox {
   }
 
   createChatbox() {
+    const existingChatbox = document.querySelector(".chatbox-container");
+    if (existingChatbox) {
+      existingChatbox.remove();
+    }
     this.chatboxElement = document.createElement("div");
     this.chatboxElement.className = "chatbox-container";
     this.chatboxElement.innerHTML = `
       <div class="chatbox-header">
         <div class="chatbox-header-buttons">
-          <button class="close-button"><img src="${closeIconPath}" alt="close"></button>
           <button class="reload-button"><img src="${reload}" alt="Reload"></button>
         </div>
         <div class="chatbox-header-avatar-wrapper">
@@ -165,7 +176,7 @@ class Chatbox {
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
       <div class="chatbox-input">
-        <input type="text" id="chatInput" placeholder="Type a message..." />
+        <textarea id="chatInput" placeholder="Type a message..."></textarea>
         <button id="sendButton"><img class="send-button" src="${sendIconPath}" alt="Send"></button>
       </div>
       <div class="chatbox-footer">
@@ -187,27 +198,38 @@ class Chatbox {
     this.reloadButton = this.chatboxElement.querySelector(".reload-button");
 
     this.sendButton.addEventListener("click", () => this.sendMessage());
-    this.chatInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.sendMessage();
-    });
-    this.closeButton.addEventListener("click", () => {
-      this.chatboxElement.style.display = "none";
-      this.chatButton.style.display = "flex";
-    });
 
     this.reloadButton.addEventListener("click", () => this.reloadChatbox());
 
     this.chatButton.addEventListener("click", () => {
-      this.chatboxElement.style.display = "flex";
-      this.chatButton.style.display = "none";
+      if (this.chatboxElement.style.display === "none") {
+        this.openChatbox();
+      } else {
+        this.closeChatbox();
+      }
     });
 
     this.chatboxElement.style.display = "none";
   }
 
+  openChatbox() {
+    this.chatboxElement.style.display = "flex";
+    this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
+  }
+
+  closeChatbox() {
+    this.chatboxElement.style.display = "none";
+    this.chatButton.style.backgroundImage = `url(${this.iconWidget})`;
+    this.chatButton.style.backgroundSize = "24px 24px";
+    this.chatButton.style.backgroundPosition = "center";
+    this.chatButton.style.backgroundRepeat = "no-repeat";
+  }
+
   reloadChatbox() {
     this.chatMessages.innerHTML = "";
-    this.fetchChatboxConfig();
+    this.fetchChatboxConfig().then(() => {
+      this.openChatbox();
+    });
     this.initMessages();
   }
 
@@ -326,6 +348,14 @@ class Chatbox {
       }
 
       const data = await response.json();
+
+      if (
+        data.detail &&
+        data.detail === "chat requests cannot be sent from this domain"
+      ) {
+        return data.detail;
+      }
+
       return data.response;
     } catch (error) {
       console.error("Failed to get bot response:", error);
@@ -347,16 +377,21 @@ styles.innerHTML = `
         --main-color: #f37021; /* Default color */
       }
 
-      ul, ol {
+      *{
+        margin: 0;
         padding: 0;
-        margin-left: 4px;
+        box-sizing: border-box;
+      }
+
+      ul, ol {
+        padding: 0 !important;
       }
   
       .chatbox-container {
         width: 450px;
         height: 600px;
         position: fixed;
-        bottom: 30px;
+        bottom: 100px;
         right: 30px;
         display: flex;
         flex-direction: column;
@@ -440,6 +475,10 @@ styles.innerHTML = `
       .chatbox-message-container.bot {
         justify-content: flex-start;
       }
+
+      .chatbox-message-container.bot ol{
+        padding: 0 !important;
+      }
       
       .chatbox-message-container.user {
         justify-content: flex-end;
@@ -460,13 +499,16 @@ styles.innerHTML = `
         position: relative;
       }
     
-      .chatbox-input input {
+      .chatbox-input textarea {
+        resize: none;
         flex: 1;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 3px;
         outline: none;
         box-shadow: none;
+        font-family: "Inter";
+        align-content: center;
       }
     
       .chatbox-input button {
@@ -478,7 +520,7 @@ styles.innerHTML = `
         border-radius: 3px;
         position: absolute;
         right: 15px;
-        top: 12px;
+        top: 20px;
       }
     
       .chatbox-footer {
@@ -504,8 +546,8 @@ styles.innerHTML = `
         background: var(--main-color);
         color: white;
         border: none;
-        height: 61px;
-        width: 61px;
+        height: 70px;
+        width: 70px;
         border-radius: 50%;
         display: flex;
         flex-direction: column;
@@ -518,9 +560,9 @@ styles.innerHTML = `
     
       .chatbox-message.user {
         text-align: right;
-        background: #eee;
+        background: #F8F8F8;
         color: #333;
-        padding: 5px 10px;
+        padding: 10px !important;
         border-radius: 10px;
         margin-bottom: 12px;
         max-width: 70%;
@@ -535,7 +577,7 @@ styles.innerHTML = `
         color: white;
         border-radius: 10px;
         margin-bottom: 12px;
-        padding: 5px 10px;
+        padding: 10px !important;
         min-width: 15px;
         max-width: fit-content;
         align-self: flex-start;
@@ -553,7 +595,8 @@ styles.innerHTML = `
         border-radius: 5px;
         cursor: pointer;
         font-size: 12px;
-        font-family: "Inter"
+        font-family: "Inter";
+        font-weight: 500;
       }
 
       .icon-wrapper{
@@ -563,8 +606,8 @@ styles.innerHTML = `
         justify-content: center;
         background: #F8F8F8;
         border-radius: 50%;
-        width: 25px;
-        height: 25px;
+        width: 40px;
+        height: 40px;
         margin-right: 10px;
       }
       
@@ -602,6 +645,20 @@ styles.innerHTML = `
       @keyframes bounce {
         0%, 80%, 100% { transform: scale(0); }
         40% { transform: scale(1); }
+      }
+
+      @media screen and (max-width: 440px) {
+        .chatbox-container{
+          right: 8px;
+          width: 96%;
+          height: 90%;
+          bottom: 80px
+        }
+
+        .chatbox-chat-button{
+          height: 50px;
+          width: 50px;
+        }
       }
     `;
 document.head.appendChild(styles);
