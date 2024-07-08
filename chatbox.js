@@ -24,6 +24,23 @@ class Chatbox {
     this.fetchChatboxConfig();
   }
 
+  addTypingAnimation() {
+    const typingContainer = document.createElement("div");
+    typingContainer.className =
+      "chatbox-message-container bot typing-container";
+    const typingDots = `
+      <div class="typing-animation">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    `;
+    typingContainer.innerHTML = typingDots;
+    this.chatMessages.appendChild(typingContainer);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    return typingContainer;
+  }
+
   async fetchChatboxConfig() {
     const response = await fetch(
       "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
@@ -248,23 +265,17 @@ class Chatbox {
   }
 
   async handlePredefinedAnswerClick(answer) {
-    // Add user message
     this.addMessage("user", answer.question);
 
     // Add typing animation
-    const typingMessage = document.createElement("div");
-    typingMessage.className = "chatbox-message bot typing";
-    typingMessage.innerText = "Bot is typing";
-    this.chatMessages.appendChild(typingMessage);
-    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    const typingContainer = this.addTypingAnimation();
 
     // Simulate delay for typing animation
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Remove typing animation
-    typingMessage.remove();
+    typingContainer.remove();
 
-    // Add bot response
     this.addMessage("bot", answer.answer, this.iconBot);
   }
 
@@ -276,14 +287,7 @@ class Chatbox {
     this.chatInput.value = "";
 
     // Add typing animation
-    const typingMessage = document.createElement("div");
-    typingMessage.className = "chatbox-message-container bot typing-container";
-    const typingElement = document.createElement("div");
-    typingElement.className = "chatbox-message bot typing";
-    typingElement.innerText = ".";
-    typingMessage.appendChild(typingElement);
-    this.chatMessages.appendChild(typingMessage);
-    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    const typingContainer = this.addTypingAnimation();
 
     const botResponse = await this.getBotResponse(
       this.secretChatId,
@@ -294,7 +298,7 @@ class Chatbox {
     const formattedResponse = this.formatText(botResponse);
 
     // Remove typing animation
-    typingMessage.remove();
+    typingContainer.remove();
 
     this.addMessage("bot", formattedResponse, this.iconBot);
   }
@@ -552,28 +556,6 @@ styles.innerHTML = `
         font-family: "Inter"
       }
 
-      .typing::after {
-        content: ".";
-        animation: dots 1s steps(5, end) infinite;
-      }
-      
-      @keyframes dots {
-        0%, 20% {
-          color: transparent;
-          text-shadow: .25em 0 0 transparent, .5em 0 0 transparent;
-        }
-        40% {
-          color: #fff;
-          text-shadow: .25em 0 0 #fff, .5em 0 0 transparent;
-        }
-        60% {
-          text-shadow: .25em 0 0 #fff, .5em 0 0 #fff;
-        }
-        80%, 100% {
-          text-shadow: .25em 0 0 #fff, .5em 0 0 #fff;
-        }
-      }
-
       .icon-wrapper{
         display: flex;
         align-items: center;
@@ -591,27 +573,35 @@ styles.innerHTML = `
         height: 14px;
       }
 
-      @keyframes typing {
-        0% {
-          width: 5px;
-          height: 5px;
-          background-color: #fff;
-        }
-        33% {
-          width: 5px;
-          height: 5px;
-          background-color: #fff;
-        }
-        66% {
-          width: 5px;
-          height: 5px;
-          background-color: #fff;
-        }
-        100% {
-          width: 5px;
-          height: 5px;
-          background-color: #fff;
-        }
+      .typing-animation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--main-color);
+        padding: 10px;
+        border-radius: 4px;
+        gap: 5px;
+      }
+    
+      .dot {
+        width: 6px;
+        height: 6px;
+        background-color: #FFF;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+      }
+    
+      .dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+    
+      .dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    
+      @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
       }
     `;
 document.head.appendChild(styles);
