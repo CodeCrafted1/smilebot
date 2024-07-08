@@ -180,7 +180,7 @@ class Chatbox {
         <button id="sendButton"><img class="send-button" src="${sendIconPath}" alt="Send"></button>
       </div>
       <div class="chatbox-footer">
-        <img src="${logoPath}" alt="logo" class="logo"/> <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+         <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
     `;
 
@@ -198,6 +198,28 @@ class Chatbox {
     this.reloadButton = this.chatboxElement.querySelector(".reload-button");
 
     this.sendButton.addEventListener("click", () => this.sendMessage());
+
+    this.chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        this.sendMessage();
+        this.chatInput.value = "";
+      } else if (e.key === "Enter" && e.shiftKey) {
+        e.preventDefault();
+        let textarea = e.target;
+        let cursorPosition = textarea.selectionStart;
+        let textBeforeCursor = textarea.value.substring(0, cursorPosition);
+        let textAfterCursor = textarea.value.substring(cursorPosition);
+        textarea.value = textBeforeCursor + "\n" + textAfterCursor;
+        textarea.selectionStart = cursorPosition + 1;
+        textarea.selectionEnd = cursorPosition + 1;
+      }
+    });
+
+    this.chatInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        this.chatInput.placeholder = "Введіть ваше повідомлення...";
+      }
+    });
 
     this.reloadButton.addEventListener("click", () => this.reloadChatbox());
 
@@ -220,7 +242,7 @@ class Chatbox {
   closeChatbox() {
     this.chatboxElement.style.display = "none";
     this.chatButton.style.backgroundImage = `url(${this.iconWidget})`;
-    this.chatButton.style.backgroundSize = "24px 24px";
+    this.chatButton.style.backgroundSize = "28px 28px";
     this.chatButton.style.backgroundPosition = "center";
     this.chatButton.style.backgroundRepeat = "no-repeat";
   }
@@ -391,7 +413,7 @@ styles.innerHTML = `
         width: 450px;
         height: 600px;
         position: fixed;
-        bottom: 100px;
+        bottom: 120px;
         right: 30px;
         display: flex;
         flex-direction: column;
@@ -497,30 +519,34 @@ styles.innerHTML = `
         display: flex;
         padding: 10px;
         position: relative;
+        background: #fff;
       }
     
       .chatbox-input textarea {
         resize: none;
         flex: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
+        padding: 10px 50px 10px 10px;
+        border: 1px solid rgba(248, 248, 248, 1);
+        border-radius: 4px;
         outline: none;
         box-shadow: none;
         font-family: "Inter";
         align-content: center;
+        background-color: rgba(248, 248, 248, 1);
+        font-size: 15px;
       }
     
       .chatbox-input button {
-        padding: 5px 10px;
+        width: 34px;
+        height: 34px;
         border: none;
-        background: transparent;
+        background: var(--main-color);
         color: white;
         cursor: pointer;
         border-radius: 3px;
         position: absolute;
         right: 15px;
-        top: 20px;
+        top: 22px;
       }
     
       .chatbox-footer {
@@ -528,21 +554,30 @@ styles.innerHTML = `
         text-align: center;
         align-items: center;
         display: flex;
+        justify-content: center;
+        width: 100%;
         margin: 0 auto;
-        font-size: 12px;
+        background-color: #fff;
+        
         border-bottom-left-radius: 10px;
         border-bottom-right-radius: 10px;
+      }
+
+      .chatbox-footer{
+        font-size: 15px;
+        font-family: 'Inter';
+        font-weight: 500;
       }
   
       .chatbox-footer-link{
           text-decoration: none;
-          color: var(--main-color);
+          color: rgba(239, 77, 7, 1);
       }
     
       .chatbox-chat-button {
         position: fixed;
-        bottom: 10px;
-        right: 10px;
+        bottom: 30px;
+        right: 30px;
         background: var(--main-color);
         color: white;
         border: none;
@@ -559,29 +594,29 @@ styles.innerHTML = `
       }
     
       .chatbox-message.user {
-        text-align: right;
         background: #F8F8F8;
         color: #333;
         padding: 10px !important;
-        border-radius: 10px;
+        border-radius: 4px;
         margin-bottom: 12px;
         max-width: 70%;
         align-self: flex-end;
-        font-size: 12px;
-        font-family: "Inter"
+        font-size: 15px;
+        font-family: "Inter";
+        word-wrap: break-word;
       }
       
       .chatbox-message.bot {
         text-align: left;
         background: var(--main-color);
         color: white;
-        border-radius: 10px;
+        border-radius: 4px;
         margin-bottom: 12px;
         padding: 10px !important;
         min-width: 15px;
         max-width: fit-content;
         align-self: flex-start;
-        font-size: 12px;
+        font-size: 15px;
         font-family: "Inter"
       }
       
@@ -592,9 +627,9 @@ styles.innerHTML = `
         padding: 5px 10px;
         color: var(--main-color);
         margin: 5px;
-        border-radius: 5px;
+        border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 15px;
         font-family: "Inter";
         font-weight: 500;
       }
@@ -606,14 +641,14 @@ styles.innerHTML = `
         justify-content: center;
         background: #F8F8F8;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 55px;
+        height: 55px;
         margin-right: 10px;
       }
       
       .bot-icon {
-        width: 14px;
-        height: 14px;
+        width: 24px;
+        height: 24px;
       }
 
       .typing-animation {
