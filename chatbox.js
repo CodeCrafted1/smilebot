@@ -450,6 +450,7 @@ styles.innerHTML = `
       .send-button {
          width: 23px;
          height: 23px;
+         margin-top: 3px;
         }
 
       .chatBotName {
