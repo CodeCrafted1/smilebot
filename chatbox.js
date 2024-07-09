@@ -22,8 +22,39 @@ class Chatbox {
     this.domainHostName = window.location.hostname;
     this.iconWidget = "";
     this.closeIconPath = "";
+    this.countryCode = "";
 
     this.fetchChatboxConfig();
+  }
+
+  async getUserCountry() {
+    try {
+      const response = await fetch(
+        "https://smilebot-sk-1.onrender.com/api/payments/country/",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      return data.country_code;
+    } catch (error) {
+      console.error("Error fetching user country:", error);
+      return "US";
+    }
+  }
+
+  getPlaceholderText(countryCode) {
+    switch (countryCode) {
+      case "SK":
+        return "Napíšte správu...";
+      case "CZ":
+        return "Napište zprávu...";
+      default:
+        return "Type a message...";
+    }
   }
 
   addTypingAnimation() {
@@ -159,6 +190,7 @@ class Chatbox {
   }
 
   createChatbox() {
+    this.getUserCountry();
     const existingChatbox = document.querySelector(".chatbox-container");
     if (existingChatbox) {
       existingChatbox.remove();
@@ -201,8 +233,12 @@ class Chatbox {
 
     this.chatInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
-        this.sendMessage();
-        this.chatInput.value = "";
+        if (this.chatInput.value.trim() === "") {
+          e.preventDefault();
+        } else {
+          this.sendMessage();
+          this.chatInput.value = "";
+        }
       } else if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
         let textarea = e.target;
@@ -217,7 +253,7 @@ class Chatbox {
 
     this.chatInput.addEventListener("keyup", (e) => {
       if (e.key === "Enter") {
-        this.chatInput.placeholder = "Введіть ваше повідомлення...";
+        this.chatInput.placeholder = "Type a message...";
       }
     });
 
@@ -232,6 +268,8 @@ class Chatbox {
     });
 
     this.chatboxElement.style.display = "none";
+
+    this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
   }
 
   openChatbox() {
@@ -448,8 +486,8 @@ styles.innerHTML = `
       }
 
       .send-button {
-         width: 23px;
-         height: 23px;
+         width: 13px;
+         height: 13px;
          margin-top: 3px;
         }
 
@@ -463,18 +501,11 @@ styles.innerHTML = `
         background: transparent;
         border: none;
         cursor: pointer;
-        margin-right: 10px;
       }
       
       .reload-button img {
-        width: 17px;
-        height: 17px;
-      }
-
-      .chatbox-header-buttons{
-        display: flex;
-        align-items: center;
-        flex-direction: row-reverse;
+        width: 22px;
+        height: 22px;
       }
     
       .agent-avatar {
@@ -518,7 +549,7 @@ styles.innerHTML = `
     
       .chatbox-input {
         display: flex;
-        padding: 10px;
+        padding: 10px 10px 0 10px;
         position: relative;
         background: #fff;
       }
@@ -538,16 +569,16 @@ styles.innerHTML = `
       }
     
       .chatbox-input button {
-        width: 34px;
-        height: 34px;
+        width: 19px;
+        height: 19px;
         border: none;
         background: var(--main-color);
         color: white;
         cursor: pointer;
-        border-radius: 3px;
+        border-radius: 8px;
         position: absolute;
-        right: 15px;
-        top: 22px;
+        right: 20px;
+        top: 29px;
       }
     
       .chatbox-footer {
