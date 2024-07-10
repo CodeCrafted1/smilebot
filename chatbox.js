@@ -39,7 +39,7 @@ class Chatbox {
         }
       );
       const data = await response.json();
-      return data.country_code;
+      this.countryCode = data.country_code;
     } catch (error) {
       console.error("Error fetching user country:", error);
       return "US";
@@ -75,6 +75,7 @@ class Chatbox {
   }
 
   async fetchChatboxConfig() {
+    await this.getUserCountry();
     const response = await fetch(
       "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
       {
@@ -190,7 +191,6 @@ class Chatbox {
   }
 
   createChatbox() {
-    this.getUserCountry();
     const existingChatbox = document.querySelector(".chatbox-container");
     if (existingChatbox) {
       existingChatbox.remove();
@@ -569,8 +569,8 @@ styles.innerHTML = `
       }
     
       .chatbox-input button {
-        width: 19px;
-        height: 19px;
+        width: 24px;
+        height: 24px;
         border: none;
         background: var(--main-color);
         color: white;
