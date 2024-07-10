@@ -23,6 +23,9 @@ class Chatbox {
     this.iconWidget = "";
     this.closeIconPath = "";
     this.countryCode = "";
+    this.startMessage = [];
+    this.showWelcomeMessage = true;
+    this.iconBot = "";
 
     this.fetchChatboxConfig();
   }
@@ -95,9 +98,6 @@ class Chatbox {
       return;
     }
 
-    this.createChatbox();
-    this.initMessages();
-
     const data = await response.json();
     const {
       style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
@@ -105,8 +105,15 @@ class Chatbox {
       predefined_answers,
     } = data;
 
+    this.iconBot = icon_bot;
     this.iconWidget = icon_widget;
     this.closeIconPath = closeIconPath;
+    this.startMessages = start_message
+      ? start_message.map((msg) => msg.message)
+      : [];
+
+    this.createChatbox();
+    this.initMessages();
 
     const sendButton = this.chatboxElement.querySelector("#sendButton img");
     if (sendButton) {
@@ -212,7 +219,7 @@ class Chatbox {
         <button id="sendButton"><img class="send-button" src="${sendIconPath}" alt="Send"></button>
       </div>
       <div class="chatbox-footer">
-         <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+        <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
     `;
 
@@ -236,6 +243,7 @@ class Chatbox {
         if (this.chatInput.value.trim() === "") {
           e.preventDefault();
         } else {
+          e.preventDefault();
           this.sendMessage();
           this.chatInput.value = "";
         }
@@ -259,25 +267,130 @@ class Chatbox {
 
     this.reloadButton.addEventListener("click", () => this.reloadChatbox());
 
+    this.chatboxElement.style.display = "none";
+
+    this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
+
+    if (this.showWelcomeMessage) {
+      const startMessagesContainer = document.createElement("div");
+      startMessagesContainer.id = "startMessagesContainerId";
+      startMessagesContainer.className = "start-messages-container";
+      document.body.appendChild(startMessagesContainer);
+
+      this.startMessages.forEach((message, index) => {
+        const startMessageBlock = document.createElement("div");
+        startMessageBlock.id = `startMessageBlock${index}`;
+        startMessageBlock.className = "start-message-block";
+        startMessageBlock.innerHTML = `
+          <div class="start-message-relative">
+            ${
+              index === 0
+                ? `
+              <div class="icon-wrapper">
+                <img src="${this.iconBot}" alt="Agent" class="bot-icon" id="start-message-avatar">
+              </div>
+              `
+                : ""
+            }
+            <div class="start-message-bot" id="start-message${index}">${message}</div>
+            ${
+              index === 0
+                ? `
+              <button class="close-start-message"><img src="${closeIconPath}" alt="Close"></button>
+              `
+                : ""
+            }
+          </div>
+        `;
+
+        startMessagesContainer.appendChild(startMessageBlock);
+
+        const startMessageBlockId = document.getElementById(
+          "startMessagesContainerId"
+        );
+
+        if (index === 0) {
+          const closeStartMessageButton = startMessageBlock.querySelector(
+            ".close-start-message"
+          );
+
+          closeStartMessageButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            this.showWelcomeMessage = false;
+            startMessageBlockId.style.display = "none";
+          });
+
+          startMessageBlockId.addEventListener("click", () => {
+            startMessageBlockId.style.display = "none";
+            this.openChatbox();
+          });
+
+          const startMessageBlockIcon = startMessageBlock.querySelector(
+            "#start-message-avatar"
+          );
+
+          if (startMessageBlockIcon) {
+            startMessageBlockIcon.addEventListener("click", () => {
+              startMessageBlockId.style.display = "none";
+              this.openChatbox();
+            });
+          }
+        }
+
+        const startMessage1 = document.getElementById("start-message1");
+        const startMessage2 = document.getElementById("start-message2");
+        const startMessage3 = document.getElementById("start-message3");
+        const startMessage4 = document.getElementById("start-message4");
+
+        if (startMessage1) {
+          startMessage1.style.marginLeft = "65px";
+        }
+
+        if (startMessage2) {
+          startMessage2.style.marginLeft = "65px";
+        }
+
+        if (startMessage3) {
+          startMessage3.style.marginLeft = "65px";
+        }
+
+        if (startMessage4) {
+          startMessage4.style.marginLeft = "65px";
+        }
+      });
+    }
+
     this.chatButton.addEventListener("click", () => {
       if (this.chatboxElement.style.display === "none") {
         this.openChatbox();
+        if (startMessageBlockId) {
+          startMessageBlockId.style.display = "none";
+        }
       } else {
         this.closeChatbox();
       }
     });
-
-    this.chatboxElement.style.display = "none";
-
-    this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
   }
 
   openChatbox() {
+    const startMessageBlockId = document.getElementById(
+      "startMessagesContainerId"
+    );
+    if (startMessageBlockId) {
+      startMessageBlockId.style.display = "none";
+    }
     this.chatboxElement.style.display = "flex";
     this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
   }
 
   closeChatbox() {
+    const startMessageBlockId = document.getElementById(
+      "startMessagesContainerId"
+    );
+    if (startMessageBlockId && this.showWelcomeMessage) {
+      startMessageBlockId.style.display = "flex";
+    }
+
     this.chatboxElement.style.display = "none";
     this.chatButton.style.backgroundImage = `url(${this.iconWidget})`;
     this.chatButton.style.backgroundSize = "28px 28px";
@@ -367,6 +480,7 @@ class Chatbox {
 
     this.addMessage("user", message);
     this.chatInput.value = "";
+    this.chatInput.focus();
 
     // Add typing animation
     const typingContainer = this.addTypingAnimation();
@@ -446,6 +560,43 @@ styles.innerHTML = `
       ul, ol {
         padding: 0 !important;
       }
+
+      .start-messages-container {
+        position: fixed;
+        bottom: 130px;
+        right: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Adds space between each message block */
+      }
+      
+      .start-message-block {
+        display: flex;
+      }
+      
+      .start-message-relative {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      
+      .icon-wrapper {
+        margin-right: 10px;
+      }
+      
+      .start-message-bot {
+        background-color: #f1f1f1; /* Example background color */
+        padding: 10px;
+        border-radius: 5px;
+      }
+      
+      .close-start-message {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+      
   
       .chatbox-container {
         width: 450px;
@@ -513,6 +664,28 @@ styles.innerHTML = `
         height: 30px;
         margin-right: 10px;
         border-radius: 50%;
+      }
+
+      .start-message-relative{
+        position: relative;
+        display: flex;
+      }
+
+      .close-start-message{
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: var(--main-color);
+        color: white;
+        cursor: pointer;
+        border-radius: 50%;
+        position: absolute;
+        right: 0px;
+        top: -33px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
 
       .chatbox-header-avatar-wrapper{
@@ -639,6 +812,21 @@ styles.innerHTML = `
       }
       
       .chatbox-message.bot {
+        text-align: left;
+        background: var(--main-color);
+        color: white;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        padding: 10px !important;
+        min-width: 15px;
+        max-width: fit-content;
+        align-self: flex-start;
+        font-size: 15px;
+        font-family: "Inter"
+        max-width: 300px;
+      }
+
+      .start-message-bot{
         text-align: left;
         background: var(--main-color);
         color: white;
