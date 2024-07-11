@@ -568,6 +568,7 @@ styles.innerHTML = `
         display: flex;
         flex-direction: column;
         gap: 10px; /* Adds space between each message block */
+        z-index: 9999999999;
       }
       
       .start-message-block {
@@ -608,6 +609,7 @@ styles.innerHTML = `
         flex-direction: column;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
+        z-index: 9999999999;
       }
     
       .chatbox-header {
@@ -686,6 +688,7 @@ styles.innerHTML = `
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        z-index: 9999999999;
       }
 
       .chatbox-header-avatar-wrapper{
@@ -796,6 +799,7 @@ styles.innerHTML = `
         cursor: pointer;
         background-repeat: no-repeat;
         background-position: center;
+        z-index: 999999999;
       }
     
       .chatbox-message.user {
