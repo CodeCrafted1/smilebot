@@ -33,7 +33,7 @@ class Chatbox {
   async getUserCountry() {
     try {
       const response = await fetch(
-        "https://smilebot-sk-1.onrender.com/api/payments/country/",
+        "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/payments/country/",
         {
           method: "GET",
           headers: {
@@ -80,7 +80,7 @@ class Chatbox {
   async fetchChatboxConfig() {
     await this.getUserCountry();
     const response = await fetch(
-      "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
+      "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/chat-bot/get-style-predifened-answer/",
       {
         method: "POST",
         headers: {
@@ -153,9 +153,11 @@ class Chatbox {
     // Save bot icon URL
     this.iconBot = icon_bot;
 
-    // Display start_message
-    if (start_message && start_message.length > 0) {
-      this.addMessage("bot", start_message[0].message, this.iconBot);
+    // Display start_messages
+    if (this.startMessages.length > 0) {
+      this.startMessages.forEach((msg) => {
+        this.addMessage("bot", msg, this.iconBot);
+      });
     }
 
     // Display predefined_answers as buttons
@@ -205,21 +207,21 @@ class Chatbox {
     this.chatboxElement = document.createElement("div");
     this.chatboxElement.className = "chatbox-container";
     this.chatboxElement.innerHTML = `
-      <div class="chatbox-header">
-        <div class="chatbox-header-buttons">
-          <button class="reload-button"><img src="${reload}" alt="Reload"></button>
+      <div class="chatbox-header" id="chatbox-header">
+        <div class="chatbox-header-buttons" id="chatbox-header-buttons">
+          <button class="reload-button" id="reload-button"><img src="${reload}" alt="Reload"></button>
         </div>
-        <div class="chatbox-header-avatar-wrapper">
-          <span class="chatBotName">${this.chatBotName}</span>
+        <div class="chatbox-header-avatar-wrapper" id="chatbox-header-avatar-wrapper">
+          <span class="chatBotName" id="chatBotName">${this.chatBotName}</span>
         </div>
       </div>
       <div id="chatMessages" class="chatbox-messages"></div>
-      <div class="chatbox-input">
+      <div class="chatbox-input" id="chatbox-input">
         <textarea id="chatInput" placeholder="Type a message..."></textarea>
-        <button id="sendButton"><img class="send-button" src="${sendIconPath}" alt="Send"></button>
+        <button id="sendButton"><img class="send-button" id="send-button" src="${sendIconPath}" alt="Send"></button>
       </div>
-      <div class="chatbox-footer">
-        <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link">Chatlix.eu</a></span>
+      <div class="chatbox-footer" id="chatbox-footer">
+        <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link" id="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
     `;
 
@@ -233,8 +235,8 @@ class Chatbox {
     this.chatMessages = this.chatboxElement.querySelector("#chatMessages");
     this.chatInput = this.chatboxElement.querySelector("#chatInput");
     this.sendButton = this.chatboxElement.querySelector("#sendButton");
-    this.closeButton = this.chatboxElement.querySelector(".close-button");
-    this.reloadButton = this.chatboxElement.querySelector(".reload-button");
+    this.closeButton = this.chatboxElement.querySelector("#close-button");
+    this.reloadButton = this.chatboxElement.querySelector("#reload-button");
 
     this.sendButton.addEventListener("click", () => this.sendMessage());
 
@@ -282,11 +284,11 @@ class Chatbox {
         startMessageBlock.id = `startMessageBlock${index}`;
         startMessageBlock.className = "start-message-block";
         startMessageBlock.innerHTML = `
-          <div class="start-message-relative">
+          <div class="start-message-relative" id="start-message-relative">
             ${
               index === 0
                 ? `
-              <div class="icon-wrapper">
+              <div class="icon-wrapper" id="icon-wrapper">
                 <img src="${this.iconBot}" alt="Agent" class="bot-icon" id="start-message-avatar">
               </div>
               `
@@ -296,7 +298,7 @@ class Chatbox {
             ${
               index === 0
                 ? `
-              <button class="close-start-message"><img src="${closeIconPath}" alt="Close"></button>
+              <button class="close-start-message" id="close-start-message"><img src="${closeIconPath}" alt="Close"></button>
               `
                 : ""
             }
@@ -362,6 +364,9 @@ class Chatbox {
 
     this.chatButton.addEventListener("click", () => {
       if (this.chatboxElement.style.display === "none") {
+        const startMessageBlockId = document.getElementById(
+          "startMessagesContainerId"
+        );
         this.openChatbox();
         if (startMessageBlockId) {
           startMessageBlockId.style.display = "none";
@@ -400,9 +405,11 @@ class Chatbox {
 
   reloadChatbox() {
     this.chatMessages.innerHTML = "";
+    this.showWelcomeMessage = false;
     this.fetchChatboxConfig().then(() => {
       this.openChatbox();
     });
+
     this.initMessages();
   }
 
@@ -418,7 +425,7 @@ class Chatbox {
 
     if (from === "bot" && iconUrl) {
       const wrapper = document.createElement("div");
-      wrapper.className = "icon-wrapper";
+      wrapper.id = "icon-wrapper";
 
       const icon = document.createElement("img");
       icon.src = iconUrl;
@@ -502,7 +509,7 @@ class Chatbox {
   async getBotResponse(secretKey, message, domain) {
     try {
       const response = await fetch(
-        "https://smilebot-sk-1.onrender.com/api/chat-bot/do-request-chat-gpt/",
+        "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/chat-bot/do-request-chat-gpt/",
         {
           method: "POST",
           headers: {
@@ -558,7 +565,7 @@ styles.innerHTML = `
       }
 
       ul, ol {
-        padding: 0 !important;
+        padding: 0;
       }
 
       .start-messages-container {
@@ -575,14 +582,14 @@ styles.innerHTML = `
         display: flex;
       }
       
-      .start-message-relative {
+      #start-message-relative {
         position: relative;
         display: flex;
         align-items: center;
       }
       
-      .icon-wrapper {
-        margin-right: 10px;
+      #icon-wrapper {
+        margin-right: 10px !important;
       }
       
       .start-message-bot {
@@ -591,7 +598,7 @@ styles.innerHTML = `
         border-radius: 5px;
       }
       
-      .close-start-message {
+      #close-start-message {
         background: none;
         border: none;
         cursor: pointer;
@@ -612,7 +619,7 @@ styles.innerHTML = `
         z-index: 9999999999;
       }
     
-      .chatbox-header {
+      #chatbox-header {
         background: var(--main-color);
         color: white;
         padding: 20px 15px;
@@ -638,25 +645,25 @@ styles.innerHTML = `
        width: 25px;
       }
 
-      .send-button {
-         width: 13px;
-         height: 13px;
+      #send-button {
+         width: 18px;
+         height: 18px;
          margin-top: 3px;
         }
 
-      .chatBotName {
+      #chatBotName {
         font-size: 18px;
         font-weight: 500;
         font-family: Inter;
       }
 
-      .reload-button {
+      #reload-button {
         background: transparent;
         border: none;
         cursor: pointer;
       }
       
-      .reload-button img {
+      #reload-button img {
         width: 22px;
         height: 22px;
       }
@@ -668,12 +675,12 @@ styles.innerHTML = `
         border-radius: 50%;
       }
 
-      .start-message-relative{
+      #start-message-relative{
         position: relative;
         display: flex;
       }
 
-      .close-start-message{
+      #close-start-message{
         width: 24px;
         height: 24px;
         border: none;
@@ -691,7 +698,7 @@ styles.innerHTML = `
         z-index: 9999999999;
       }
 
-      .chatbox-header-avatar-wrapper{
+      #chatbox-header-avatar-wrapper{
         display: flex;
         align-items: center;
       }
@@ -707,7 +714,7 @@ styles.innerHTML = `
       }
 
       .chatbox-message-container.bot ol{
-        padding: 0 !important;
+        padding: 0;
       }
       
       .chatbox-message-container.user {
@@ -723,17 +730,17 @@ styles.innerHTML = `
         overflow: auto;
       }
     
-      .chatbox-input {
+      #chatbox-input {
         display: flex;
         padding: 10px 10px 0 10px;
         position: relative;
         background: #fff;
       }
     
-      .chatbox-input textarea {
+      #chatbox-input textarea {
         resize: none;
         flex: 1;
-        padding: 10px 50px 10px 10px;
+        padding: 10px 60px 10px 10px;
         border: 1px solid rgba(248, 248, 248, 1);
         border-radius: 4px;
         outline: none;
@@ -744,20 +751,20 @@ styles.innerHTML = `
         font-size: 15px;
       }
     
-      .chatbox-input button {
-        width: 24px;
-        height: 24px;
+      #chatbox-input button {
+        width: 40px;
+        height: 40px;
         border: none;
         background: var(--main-color);
         color: white;
         cursor: pointer;
         border-radius: 8px;
         position: absolute;
-        right: 20px;
-        top: 29px;
+        right: 25px;
+        top: 18px;
       }
     
-      .chatbox-footer {
+      #chatbox-footer {
         padding: 10px;
         text-align: center;
         align-items: center;
@@ -771,7 +778,7 @@ styles.innerHTML = `
         border-bottom-right-radius: 10px;
       }
 
-      .chatbox-footer{
+      #chatbox-footer{
         font-size: 15px;
         font-family: 'Inter';
         font-weight: 500;
@@ -805,7 +812,7 @@ styles.innerHTML = `
       .chatbox-message.user {
         background: #F8F8F8;
         color: #333;
-        padding: 10px !important;
+        padding: 10px;
         border-radius: 4px;
         margin-bottom: 12px;
         max-width: 70%;
@@ -826,7 +833,7 @@ styles.innerHTML = `
         max-width: fit-content;
         align-self: flex-start;
         font-size: 15px;
-        font-family: "Inter"
+        font-family: "Inter";
         max-width: 300px;
       }
 
@@ -836,12 +843,12 @@ styles.innerHTML = `
         color: white;
         border-radius: 4px;
         margin-bottom: 12px;
-        padding: 10px !important;
+        padding: 10px;
         min-width: 15px;
         max-width: fit-content;
         align-self: flex-start;
         font-size: 15px;
-        font-family: "Inter"
+        font-family: "Inter";
       }
       
       .chatbox-predefined-answer {
@@ -858,7 +865,7 @@ styles.innerHTML = `
         font-weight: 500;
       }
 
-      .icon-wrapper{
+      #icon-wrapper{
         display: flex;
         align-items: center;
         flex-direction: column;
