@@ -49,6 +49,8 @@ class Chatbox {
     }
   }
 
+  //
+
   getPlaceholderText(countryCode) {
     switch (countryCode) {
       case "SK":
