@@ -33,7 +33,7 @@ class Chatbox {
   async getUserCountry() {
     try {
       const response = await fetch(
-        "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/payments/country/",
+        "https://smilebot-sk-1.onrender.com/api/payments/country/",
         {
           method: "GET",
           headers: {
@@ -80,7 +80,7 @@ class Chatbox {
   async fetchChatboxConfig() {
     await this.getUserCountry();
     const response = await fetch(
-      "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/chat-bot/get-style-predifened-answer/",
+      "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
       {
         method: "POST",
         headers: {
@@ -509,7 +509,7 @@ class Chatbox {
   async getBotResponse(secretKey, message, domain) {
     try {
       const response = await fetch(
-        "http://ec2-13-49-76-68.eu-north-1.compute.amazonaws.com/api/chat-bot/do-request-chat-gpt/",
+        "https://smilebot-sk-1.onrender.com/api/chat-bot/do-request-chat-gpt/",
         {
           method: "POST",
           headers: {
