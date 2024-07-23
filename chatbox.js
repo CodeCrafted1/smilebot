@@ -33,7 +33,7 @@ class Chatbox {
   async getUserCountry() {
     try {
       const response = await fetch(
-        "https://smilebot-sk-1.onrender.com/api/payments/country/",
+        "https://app.chatlix.eu/api/payments/country/",
         {
           method: "GET",
           headers: {
@@ -80,7 +80,7 @@ class Chatbox {
   async fetchChatboxConfig() {
     await this.getUserCountry();
     const response = await fetch(
-      "https://smilebot-sk-1.onrender.com/api/chat-bot/get-style-predifened-answer/",
+      "https://app.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
       {
         method: "POST",
         headers: {
@@ -187,7 +187,7 @@ class Chatbox {
     // Handle links: [Link text](url)
     message = message.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank">$1</a>'
+      '<a href="$2" target="_blank" class="link-styles">$1</a>'
     );
 
     // Handle inline code: `code`
@@ -195,6 +195,12 @@ class Chatbox {
 
     // Handle blockquotes: > Quote
     message = message.replace(/^\s*>\s(.*)$/gm, "<blockquote>$1</blockquote>");
+
+    // Handle plain URLs: http or https
+    message = message.replace(
+      /\b(https?:\/\/[^\s]+)\b/g,
+      '<a href="$1" target="_blank" class="link-styles">$1</a>'
+    );
 
     return message;
   }
@@ -509,7 +515,7 @@ class Chatbox {
   async getBotResponse(secretKey, message, domain) {
     try {
       const response = await fetch(
-        "https://smilebot-sk-1.onrender.com/api/chat-bot/do-request-chat-gpt/",
+        "https://app.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
         {
           method: "POST",
           headers: {
@@ -807,6 +813,11 @@ styles.innerHTML = `
         background-repeat: no-repeat;
         background-position: center;
         z-index: 999999999;
+      }
+
+      .link-styles{
+        text-decoration: underline !important;
+        color: #fff !important;
       }
     
       .chatbox-message.user {
