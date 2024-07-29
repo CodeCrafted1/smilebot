@@ -33,7 +33,7 @@ class Chatbox {
   async getUserCountry() {
     try {
       const response = await fetch(
-        "https://app.chatlix.eu/api/payments/country/",
+        "https://api.chatlix.eu/api/payments/country/",
         {
           method: "GET",
           headers: {
@@ -82,7 +82,7 @@ class Chatbox {
   async fetchChatboxConfig() {
     await this.getUserCountry();
     const response = await fetch(
-      "https://app.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
+      "https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
       {
         method: "POST",
         headers: {
@@ -517,7 +517,7 @@ class Chatbox {
   async getBotResponse(secretKey, message, domain) {
     try {
       const response = await fetch(
-        "https://app.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
+        "https://api.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
         {
           method: "POST",
           headers: {
