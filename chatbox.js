@@ -913,15 +913,15 @@ styles.innerHTML = `
         height: 6px;
         background-color: #FFF;
         border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
+        animation: bounce 1.4s infinite ease-in-out both !important;
       }
     
       .dot:nth-child(2) {
-        animation-delay: 0.2s;
+        animation-delay: 0.2s !important;
       }
     
       .dot:nth-child(3) {
-        animation-delay: 0.4s;
+        animation-delay: 0.4s !important;
       }
     
       @keyframes bounce {
