@@ -913,7 +913,7 @@ styles.innerHTML = `
         height: 6px;
         background-color: #FFF;
         border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both !important;
+        animation: bounce-animation-of-dots-2023242526 1.4s infinite ease-in-out both !important;
       }
     
       .dot:nth-child(2) {
@@ -924,24 +924,24 @@ styles.innerHTML = `
         animation-delay: 0.4s !important;
       }
     
-      @keyframes bounce {
+      @keyframes bounce-animation-of-dots-2023242526 {
         20%, 53%, 80%, 0%, 100% {
-          animation-timing-function: cubic-bezier(.215, .61, .355, 1) !important;
-          transform: translate3d(0, 0, 0) !important;
+          animation-timing-function: cubic-bezier(.215, .61, .355, 1);
+          transform: translate3d(0, 0, 0);
         }
       
         40%, 43% {
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060) !important;
-          transform: translate3d(0, -4px, 0) !important;
+          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
+          transform: translate3d(0, -4px, 0);
         }
       
         70% {
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060) !important;
-          transform: translate3d(0, -6px, 0) !important;
+          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
+          transform: translate3d(0, -6px, 0);
         }
       
         90% {
-          transform: translate3d(0, -4px, 0) !important;
+          transform: translate3d(0, -4px, 0);
         }
       }
 
