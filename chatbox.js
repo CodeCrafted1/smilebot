@@ -802,8 +802,8 @@ styles.innerHTML = `
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background: var(--main-color);
-        color: white;
+        background-color: var(--main-color) !important;
+        color: white !important;
         border: none;
         height: 70px;
         width: 70px;
