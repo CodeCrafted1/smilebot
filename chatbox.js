@@ -481,7 +481,7 @@ class Chatbox {
     const typingContainer = this.addTypingAnimation();
 
     // Simulate delay for typing animation
-    await new Promise((resolve) => setTimeout(resolve, 100000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Remove typing animation
     typingContainer.remove();
