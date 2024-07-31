@@ -481,12 +481,12 @@ class Chatbox {
     const typingContainer = this.addTypingAnimation();
 
     // Simulate delay for typing animation
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 100000));
 
     // Remove typing animation
-    // typingContainer.remove();
+    typingContainer.remove();
 
-    // this.addMessage("bot", answer.answer, this.iconBot);
+    this.addMessage("bot", answer.answer, this.iconBot);
   }
 
   async sendMessage() {
