@@ -926,22 +926,22 @@ styles.innerHTML = `
     
       @keyframes bounce {
         20%, 53%, 80%, 0%, 100% {
-          animation-timing-function: cubic-bezier(.215, .61, .355, 1);
-          transform: translate3d(0, 0, 0);
+          animation-timing-function: cubic-bezier(.215, .61, .355, 1) !important;
+          transform: translate3d(0, 0, 0) !important;
         }
       
         40%, 43% {
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
-          transform: translate3d(0, -4px, 0);
+          animation-timing-function: cubic-bezier(.755, .050, .855, .060) !important;
+          transform: translate3d(0, -4px, 0) !important;
         }
       
         70% {
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
-          transform: translate3d(0, -6px, 0);
+          animation-timing-function: cubic-bezier(.755, .050, .855, .060) !important;
+          transform: translate3d(0, -6px, 0) !important;
         }
       
         90% {
-          transform: translate3d(0, -4px, 0);
+          transform: translate3d(0, -4px, 0) !important;
         }
       }
 
