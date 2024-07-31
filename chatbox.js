@@ -49,8 +49,6 @@ class Chatbox {
     }
   }
 
-  //
-
   getPlaceholderText(countryCode) {
     switch (countryCode) {
       case "SK":
@@ -500,18 +498,18 @@ class Chatbox {
     // Add typing animation
     const typingContainer = this.addTypingAnimation();
 
-    // const botResponse = await this.getBotResponse(
-    //   this.secretChatId,
-    //   message,
-    //   this.domainHostName
-    // );
+    const botResponse = await this.getBotResponse(
+      this.secretChatId,
+      message,
+      this.domainHostName
+    );
 
-    // const formattedResponse = this.formatText(botResponse);
+    const formattedResponse = this.formatText(botResponse);
 
     // Remove typing animation
-    // typingContainer.remove();
+    typingContainer.remove();
 
-    // this.addMessage("bot", formattedResponse, this.iconBot);
+    this.addMessage("bot", formattedResponse, this.iconBot);
   }
 
   async getBotResponse(secretKey, message, domain) {
