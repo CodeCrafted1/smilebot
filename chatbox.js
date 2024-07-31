@@ -925,40 +925,23 @@ styles.innerHTML = `
       }
     
       @keyframes bounce {
-        0% {
-          transform: scale(0);
+        20%, 53%, 80%, 0%, 100% {
           animation-timing-function: cubic-bezier(.215, .61, .355, 1);
+          transform: translate3d(0, 0, 0);
         }
-        20% {
-          transform: scale(1);
-          animation-timing-function: cubic-bezier(.215, .61, .355, 1);
-        }
-        40% {
+      
+        40%, 43% {
+          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
           transform: translate3d(0, -4px, 0);
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
         }
-        43% {
-          transform: translate3d(0, -4px, 0);
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
-        }
-        53% {
-          transform: translate3d(0, -6px, 0);
-          animation-timing-function: cubic-bezier(.755, .050, .855, .060);
-        }
+      
         70% {
-          transform: translate3d(0, -6px, 0);
           animation-timing-function: cubic-bezier(.755, .050, .855, .060);
+          transform: translate3d(0, -6px, 0);
         }
-        80% {
-          transform: scale(0);
-          animation-timing-function: cubic-bezier(.215, .61, .355, 1);
-        }
+      
         90% {
           transform: translate3d(0, -4px, 0);
-          animation-timing-function: cubic-bezier(.215, .61, .355, 1);
-        }
-        100% {
-          transform: scale(0);
         }
       }
 
