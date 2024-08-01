@@ -60,10 +60,24 @@ class Chatbox {
     }
   }
 
-  addTypingAnimation() {
+  addTypingAnimation(iconUrl) {
     const typingContainer = document.createElement("div");
     typingContainer.className =
       "chatbox-message-container bot typing-container";
+
+    // Create a wrapper for the icon
+    const iconWrapper = document.createElement("div");
+    iconWrapper.id = "icon-wrapper";
+
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.src = iconUrl;
+      icon.className = "bot-icon";
+      iconWrapper.appendChild(icon);
+    }
+
+    typingContainer.appendChild(iconWrapper);
+
     const typingDots = `
       <div class="typing-animation">
         <div class="dot"></div>
@@ -71,7 +85,8 @@ class Chatbox {
         <div class="dot"></div>
       </div>
     `;
-    typingContainer.innerHTML = typingDots;
+    typingContainer.innerHTML += typingDots; // Append typing animation after the icon wrapper
+
     this.chatMessages.appendChild(typingContainer);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     return typingContainer;
@@ -495,8 +510,8 @@ class Chatbox {
     this.chatInput.value = "";
     this.chatInput.focus();
 
-    // Add typing animation
-    const typingContainer = this.addTypingAnimation();
+    // Add typing animation with bot icon
+    const typingContainer = this.addTypingAnimation(this.iconBot);
 
     const botResponse = await this.getBotResponse(
       this.secretChatId,
@@ -901,7 +916,7 @@ styles.innerHTML = `
         align-items: center;
         justify-content: center;
         background-color: var(--main-color);
-        padding: 10px;
+        padding: 20px !important;
         border-radius: 4px;
         gap: 5px;
       }
