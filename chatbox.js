@@ -94,6 +94,7 @@ class Chatbox {
 
   async fetchChatboxConfig() {
     await this.getUserCountry();
+
     const response = await fetch(
       "https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
       {
@@ -182,40 +183,42 @@ class Chatbox {
   }
 
   formatText(message) {
-    // Handle bold text: **text**
-    message = message.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
-
-    // Handle italic text: *text*
-    message = message.replace(/\*(.*?)\*/g, "<i>$1</i>");
-
-    // Handle headings: # Heading
-    message = message.replace(/^#\s(.*$)/gm, "<h1>$1</h1>");
-
-    // Handle unordered list: - List item
-    message = message.replace(/^\s*-\s(.*)$/gm, "<li>$1</li>");
-    message = `<ul>${message}</ul>`;
-
-    // Handle ordered list: 1. List item
-    message = message.replace(/^\s*\d+\.\s(.*)$/gm, "<li>$1</li>");
-    message = `<ol>${message}</ol>`;
-
     // Handle links: [Link text](url)
     message = message.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
       '<a href="$2" target="_blank" class="link-styles">$1</a>'
     );
 
-    // Handle inline code: `code`
+    // Handle plain URLs: http or https
+    // message = message.replace(
+    //   /\b(https?:\/\/[^\s]+)\b/g,
+    //   '<a href="$1" target="_blank" class="link-styles">$1</a>'
+    // );
+
+    // Handle bold text: **text**
+    message = message.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+    // // Handle italic text: *text*
+    message = message.replace(/\*(.*?)\*/g, "<i>$1</i>");
+
+    // // Handle headings: # Heading
+    message = message.replace(/^#\s(.*$)/gm, "<h1>$1</h1>");
+
+    // // Handle inline code: `code`
     message = message.replace(/`(.*?)`/g, "<code>$1</code>");
 
-    // Handle blockquotes: > Quote
+    // // Handle blockquotes: > Quote
     message = message.replace(/^\s*>\s(.*)$/gm, "<blockquote>$1</blockquote>");
 
-    // Handle plain URLs: http or https
-    message = message.replace(
-      /\b(https?:\/\/[^\s]+)\b/g,
-      '<a href="$1" target="_blank" class="link-styles">$1</a>'
-    );
+    // // Handle unordered list: - List item
+    message = message.replace(/^\s*-\s(.*)$/gm, "<li>$1</li>");
+    message = message.replace(/(<li>.*<\/li>)/gms, "<ul>$1</ul>");
+    message = message.replace(/<\/ul>\s*<ul>/g, "");
+
+    // // Handle ordered list: 1. List item
+    message = message.replace(/^\s*\d+\.\s(.*)$/gm, "<li>$1</li>");
+    message = message.replace(/(<li>.*<\/li>)/gms, "<ol>$1</ol>");
+    message = message.replace(/<\/ol>\s*<ol>/g, "");
 
     return message;
   }
@@ -294,7 +297,10 @@ class Chatbox {
 
     this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
 
-    if (this.showWelcomeMessage) {
+    if (
+      this.showWelcomeMessage &&
+      !sessionStorage.getItem("is_closed_hello_message")
+    ) {
       const startMessagesContainer = document.createElement("div");
       startMessagesContainer.id = "startMessagesContainerId";
       startMessagesContainer.className = "start-messages-container";
@@ -340,7 +346,10 @@ class Chatbox {
           closeStartMessageButton.addEventListener("click", (event) => {
             event.stopPropagation();
             this.showWelcomeMessage = false;
+            console.log("sdfgh");
             startMessageBlockId.style.display = "none";
+            console.log("sdfgh");
+            sessionStorage.setItem("is_closed_hello_message", true);
           });
 
           startMessageBlockId.addEventListener("click", () => {
@@ -881,11 +890,10 @@ styles.innerHTML = `
       }
       
       .chatbox-predefined-answer {
-        background: transparent;
+        background:var(--main-color);
         color: white;
         border: none;
         padding: 5px 10px !important;
-        color: var(--main-color);
         margin: 5px;
         border-radius: 4px;
         cursor: pointer;
