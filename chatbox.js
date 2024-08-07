@@ -14,6 +14,7 @@ class Chatbox {
   constructor(options) {
     this.agentId = options.agentId;
     this.contact = options.contact || {};
+    this.userHistory = []
     this.initialMessages = options.initialMessages || [];
     this.context = options.context || "";
     this.secretChatId = options.secret_chat_id;
@@ -29,6 +30,26 @@ class Chatbox {
 
     this.fetchChatboxConfig();
   }
+
+  setCookie(name, value, days, path = "/", secure = true, sameSite = "Lax") {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    const secureFlag = secure ? ";secure" : "";
+    const sameSiteFlag = sameSite ? ";SameSite=" + sameSite : "";
+    document.cookie = name + "=" + value + ";" + expires + ";path=" + path + secureFlag + sameSiteFlag;
+}
+
+  getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
 
   async getUserCountry() {
     try {
@@ -48,6 +69,33 @@ class Chatbox {
       return "US";
     }
   }
+
+
+  async getUserConverstationHistort(secret_key, user_uuid){
+    try{
+      const response = await fetch(
+        "https://api.chatlix.eu/api/chat-bot/history-user-conversation/",
+        {
+          method: "POST", 
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            secret_key: secret_key,
+            user_uuid: user_uuid,
+          }),
+        }
+      );
+      const data = await response.json();
+      this.userHistory = data;
+    } catch (error) {
+      console.error("Error fetching user conversation history:", error);
+      return [];
+    }
+  }
+
+
+
 
   getPlaceholderText(countryCode) {
     switch (countryCode) {
@@ -92,8 +140,19 @@ class Chatbox {
     return typingContainer;
   }
 
-  async fetchChatboxConfig() {
+  async fetchChatboxConfig(get_data=true) {
     await this.getUserCountry();
+    let user_uuid
+    if (this.getCookie('user_uuid_key')){
+        user_uuid = this.getCookie('user_uuid_key')
+    }
+    else{
+      user_uuid = this.currentUUID
+      this.setCookie('user_uuid_key', this.currentUUID, 1)
+    }
+    if (get_data){
+      await this.getUserConverstationHistort(this.secretChatId, user_uuid);
+    }
 
     const response = await fetch(
       "https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
@@ -104,7 +163,7 @@ class Chatbox {
         },
         body: JSON.stringify({
           secret_key: this.secretChatId,
-          user_uuid: this.currentUUID,
+          user_uuid: user_uuid,
         }),
       }
     );
@@ -113,7 +172,6 @@ class Chatbox {
       console.error("Failed to fetch chatbox config");
       return;
     }
-
     const data = await response.json();
     const {
       style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
@@ -296,10 +354,10 @@ class Chatbox {
     this.chatboxElement.style.display = "none";
 
     this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
-
+    
     if (
       this.showWelcomeMessage &&
-      !sessionStorage.getItem("is_closed_hello_message")
+      !this.getCookie("is_closed_hello_message")
     ) {
       const startMessagesContainer = document.createElement("div");
       startMessagesContainer.id = "startMessagesContainerId";
@@ -346,10 +404,8 @@ class Chatbox {
           closeStartMessageButton.addEventListener("click", (event) => {
             event.stopPropagation();
             this.showWelcomeMessage = false;
-            console.log("sdfgh");
             startMessageBlockId.style.display = "none";
-            console.log("sdfgh");
-            sessionStorage.setItem("is_closed_hello_message", true);
+            this.setCookie("is_closed_hello_message", true, 1);
           });
 
           startMessageBlockId.addEventListener("click", () => {
@@ -392,6 +448,8 @@ class Chatbox {
       });
     }
 
+    
+
     this.chatButton.addEventListener("click", () => {
       if (this.chatboxElement.style.display === "none") {
         const startMessageBlockId = document.getElementById(
@@ -405,6 +463,7 @@ class Chatbox {
         this.closeChatbox();
       }
     });
+    
   }
 
   openChatbox() {
@@ -416,6 +475,13 @@ class Chatbox {
     }
     this.chatboxElement.style.display = "flex";
     this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
+    if (this.userHistory) {
+      for (let i = 0; i < this.userHistory.length; i++) {
+        this.addMessage('user', this.userHistory[i]['messages'])
+        this.addMessage('bot', this.userHistory[i]['chat_answer'], this.iconBot)
+      }
+      this.userHistory = []
+    }
   }
 
   closeChatbox() {
@@ -436,20 +502,23 @@ class Chatbox {
   reloadChatbox() {
     this.chatMessages.innerHTML = "";
     this.showWelcomeMessage = false;
-    this.fetchChatboxConfig().then(() => {
+    this.fetchChatboxConfig(false).then(() => {
       this.openChatbox();
     });
-
+    this.setCookie("user_uuid_key", currentUUID, 1)
     this.initMessages();
   }
 
   initMessages() {
+    
     this.initialMessages.forEach((message) => {
       this.addMessage("bot", message);
     });
+    
   }
-
+  
   addMessage(from, message, iconUrl) {
+    
     const messageContainer = document.createElement("div");
     messageContainer.className = `chatbox-message-container ${from}`;
 
@@ -538,6 +607,14 @@ class Chatbox {
 
   async getBotResponse(secretKey, message, domain) {
     try {
+      let user_uuid
+      if (this.getCookie('user_uuid_key')){
+          user_uuid = this.getCookie('user_uuid_key')
+        }
+        else{
+        user_uuid = this.currentUUID
+        this.setCookie("user_uuid_key", this.currentUUID, 1)
+      }
       const response = await fetch(
         "https://api.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
         {
@@ -548,7 +625,7 @@ class Chatbox {
           body: JSON.stringify({
             secret_key: secretKey,
             message: message,
-            user_uuid: this.currentUUID,
+            user_uuid: user_uuid,
             domain: domain,
           }),
         }
@@ -557,7 +634,6 @@ class Chatbox {
       if (!response.ok) {
         throw new Error(`Server error: ${response.statusText}`);
       }
-
       const data = await response.json();
 
       if (
