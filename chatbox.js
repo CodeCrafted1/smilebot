@@ -178,7 +178,6 @@ class Chatbox {
       start_message,
       predefined_answers,
     } = data;
-
     this.iconBot = icon_bot;
     this.iconWidget = icon_widget;
     this.closeIconPath = closeIconPath;
@@ -476,11 +475,11 @@ class Chatbox {
     this.chatboxElement.style.display = "flex";
     this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
     if (this.userHistory) {
-      for (let i = 0; i < this.userHistory.length; i++) {
-        this.addMessage('user', this.userHistory[i]['messages'])
-        this.addMessage('bot', this.userHistory[i]['chat_answer'], this.iconBot)
-      }
-      this.userHistory = []
+    for (let i = 0; i < this.userHistory.length; i++) {
+      this.addMessage('user', this.userHistory[i]['messages'])
+      this.addMessage('bot', this.formatText(this.userHistory[i]['chat_answer']), this.iconBot)
+    }
+    this.userHistory = []
     }
   }
 
