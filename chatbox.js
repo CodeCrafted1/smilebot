@@ -109,6 +109,7 @@ class Chatbox {
   }
 
   addTypingAnimation(iconUrl) {
+
     const typingContainer = document.createElement("div");
     typingContainer.className =
       "chatbox-message-container bot typing-container";
@@ -137,6 +138,7 @@ class Chatbox {
 
     this.chatMessages.appendChild(typingContainer);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    console.log("typing");
     return typingContainer;
   }
 
@@ -476,8 +478,8 @@ class Chatbox {
     this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
     if (this.userHistory) {
     for (let i = 0; i < this.userHistory.length; i++) {
-      this.addMessage('user', this.userHistory[i]['messages'])
-      this.addMessage('bot', this.formatText(this.userHistory[i]['chat_answer']), this.iconBot)
+      this.addMessage('user', this.userHistory[i]['messages'], undefined, false)
+      this.addMessage('bot', this.formatText(this.userHistory[i]['chat_answer']), this.iconBot, false)
     }
     this.userHistory = []
     }
@@ -516,7 +518,7 @@ class Chatbox {
     
   }
   
-  addMessage(from, message, iconUrl) {
+  addMessage(from, message, iconUrl, show_animation=true) {
     
     const messageContainer = document.createElement("div");
     messageContainer.className = `chatbox-message-container ${from}`;
@@ -544,12 +546,50 @@ class Chatbox {
     } else {
       messageElement.style.padding = "5px 10px";
     }
-
-    messageElement.innerHTML = message;
-
-    messageContainer.appendChild(messageElement);
-    this.chatMessages.appendChild(messageContainer);
-    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    if (show_animation)
+    {
+      if (from == "user"){
+        const speed = 50;  // Speed of typing in milliseconds
+        let i = message.length;
+        const type = () => {
+          if (i > 0) {
+            messageElement.innerHTML += message.charAt(i);
+            i--;
+  
+            
+            setTimeout(type, speed);
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;  // Auto-scroll during typing
+          } else {
+            // If the message contains HTML elements, display them properly after typing completes
+            messageElement.innerHTML = message;
+          }
+        };
+        type();
+      }
+      else{
+        const speed = 50;  // Speed of typing in milliseconds
+        let i = 0;
+        const type = () => {
+          if (i < message.length) {
+            messageElement.innerHTML += message.charAt(i);
+            i++;
+            setTimeout(type, speed);
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;  // Auto-scroll during typing
+          } else {
+            // If the message contains HTML elements, display them properly after typing completes
+            messageElement.innerHTML = message;
+          }
+        };
+        type();
+      }}
+      else{
+        messageElement.innerHTML = message;
+      }
+    
+      messageContainer.appendChild(messageElement);
+      this.chatMessages.appendChild(messageContainer);
+      this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    
   }
 
   displayPredefinedAnswers(answers) {
