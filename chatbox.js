@@ -138,7 +138,6 @@ class Chatbox {
 
     this.chatMessages.appendChild(typingContainer);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-    console.log("typing");
     return typingContainer;
   }
 
@@ -548,17 +547,15 @@ class Chatbox {
     }
     if (show_animation)
     {
-      if (from == "user"){
-        const speed = 50;  // Speed of typing in milliseconds
-        let i = message.length;
+      if (from == "bot")
+      {
+        const speed = 25;  // Speed of typing in milliseconds
+        let i = 0;
         const type = () => {
-          if (i > 0) {
+          if (i < message.length) {
             messageElement.innerHTML += message.charAt(i);
-            i--;
-  
-            
+            i++;
             setTimeout(type, speed);
-            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;  // Auto-scroll during typing
           } else {
             // If the message contains HTML elements, display them properly after typing completes
             messageElement.innerHTML = message;
@@ -567,20 +564,7 @@ class Chatbox {
         type();
       }
       else{
-        const speed = 50;  // Speed of typing in milliseconds
-        let i = 0;
-        const type = () => {
-          if (i < message.length) {
-            messageElement.innerHTML += message.charAt(i);
-            i++;
-            setTimeout(type, speed);
-            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;  // Auto-scroll during typing
-          } else {
-            // If the message contains HTML elements, display them properly after typing completes
-            messageElement.innerHTML = message;
-          }
-        };
-        type();
+        messageElement.innerHTML = message;
       }}
       else{
         messageElement.innerHTML = message;
