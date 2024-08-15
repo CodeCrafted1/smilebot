@@ -229,8 +229,9 @@ class Chatbox {
 
     // Display start_messages
     if (this.startMessages.length > 0) {
+
       this.startMessages.forEach((msg) => {
-        this.addMessage("bot", msg, this.iconBot);
+        this.addMessage("bot", msg, this.iconBot, false);
       });
     }
 
@@ -368,17 +369,9 @@ class Chatbox {
         const startMessageBlock = document.createElement("div");
         startMessageBlock.id = `startMessageBlock${index}`;
         startMessageBlock.className = "start-message-block";
+        console.log('messa', message);
         startMessageBlock.innerHTML = `
           <div class="start-message-relative" id="start-message-relative">
-            ${
-              index === 0
-                ? `
-              <div class="icon-wrapper" id="icon-wrapper">
-                <img src="${this.iconBot}" alt="Agent" class="bot-icon" id="start-message-avatar">
-              </div>
-              `
-                : ""
-            }
             <div class="start-message-bot" id="start-message${index}">${message}</div>
             ${
               index === 0
@@ -513,12 +506,13 @@ class Chatbox {
     
     this.initialMessages.forEach((message) => {
       this.addMessage("bot", message);
+      
     });
     
   }
   
   addMessage(from, message, iconUrl, show_animation=true) {
-    
+    console.log(from,message);
     const messageContainer = document.createElement("div");
     messageContainer.className = `chatbox-message-container ${from}`;
 
@@ -551,11 +545,27 @@ class Chatbox {
       {
         const speed = 25;  // Speed of typing in milliseconds
         let i = 0;
+        let html_tag_key = false;
+        let current_tag = '';
+
         const type = () => {
           if (i < message.length) {
-            messageElement.innerHTML += message.charAt(i);
-            i++;
-            setTimeout(type, speed);
+            if (message.charAt(i) === "<" || html_tag_key) {
+              html_tag_key = true;
+              current_tag += message.charAt(i);
+              
+              if (message.charAt(i) === ">") {
+                html_tag_key = false;
+                current_tag = ''; // Reset the tag buffer
+              }
+              
+              i++;
+              setTimeout(type, speed);
+            } else {
+              messageElement.innerHTML += message.charAt(i);
+              i++;
+              setTimeout(type, speed);
+            }
           } else {
             // If the message contains HTML elements, display them properly after typing completes
             messageElement.innerHTML = message;
@@ -982,7 +992,7 @@ styles.innerHTML = `
         margin-bottom: 12px;
         padding: 10px;
         min-width: 15px;
-        max-width: fit-content;
+        max-width: 300px;
         align-self: flex-start;
         font-size: 15px;
         font-family: "Inter";
@@ -1023,7 +1033,7 @@ styles.innerHTML = `
         align-items: center;
         justify-content: center;
         background-color: var(--main-color);
-        padding: 20px !important;
+        padding: 15px !important;
         border-radius: 4px;
         gap: 5px;
       }
