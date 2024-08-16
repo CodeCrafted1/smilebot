@@ -63,7 +63,7 @@ class Chatbox {
         }
       );
       const data = await response.json();
-      this.countryCode = data.country_code;
+      this.countryCode = data.country_name;
     } catch (error) {
       console.error("Error fetching user country:", error);
       return "US";
@@ -660,6 +660,7 @@ class Chatbox {
             message: message,
             user_uuid: user_uuid,
             domain: domain,
+            country: this.countryCode
           }),
         }
       );
@@ -1028,15 +1029,28 @@ styles.innerHTML = `
         height: 24px;
       }
 
+      // .typing-animation {
+      //   display: flex;
+      //   align-items: center;
+      //   justify-content: center;
+      //   background-color: var(--main-color);
+      //   max-height: 100px;
+      //   padding: 0px 15px 0px 15px !important;
+      //   border-radius: 4px;
+      //   gap: 5px;
+    
+      // }
       .typing-animation {
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: var(--main-color);
-        padding: 15px !important;
+        max-height: 30px;
+        padding: 6px 15px 0px 15px !important;
         border-radius: 4px;
+        margin-top: 15px;
         gap: 5px;
-      }
+    }
     
       .dot {
         width: 6px;
