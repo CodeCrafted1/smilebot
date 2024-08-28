@@ -1,296 +1,302 @@
-import { generateUUID } from './uuid.js'
+import { generateUUID } from "./uuid.js";
 
-// Створення нового UUID при завантаженні сторінки
-const currentUUID = generateUUID()
+const currentUUID = generateUUID();
 
 const agentAvatarPath =
-	'https://codecrafted1.github.io/smilebot/img/agent-avatar.svg'
-const closeIconPath = 'https://codecrafted1.github.io/smilebot/img/close.svg'
-const sendIconPath = 'https://codecrafted1.github.io/smilebot/img/send.svg'
-const logoPath = 'https://codecrafted1.github.io/smilebot/img/logo.svg'
-const reload = 'https://codecrafted1.github.io/smilebot/img/reload.svg'
+  "https://codecrafted1.github.io/smilebot/img/agent-avatar.svg";
+const closeIconPath = "https://codecrafted1.github.io/smilebot/img/close.svg";
+const sendIconPath = "https://codecrafted1.github.io/smilebot/img/send.svg";
+const logoPath = "https://codecrafted1.github.io/smilebot/img/logo.svg";
+const reload = "https://codecrafted1.github.io/smilebot/img/reload.svg";
 
 class Chatbox {
-	constructor(options) {
-		this.agentId = options.agentId
-		this.contact = options.contact || {}
-		this.userHistory = []
-		this.initialMessages = options.initialMessages || []
-		this.context = options.context || ''
-		this.secretChatId = options.secret_chat_id
-		this.currentUUID = currentUUID
-		this.chatBotName = options.name_chat_bot
-		this.domainHostName = window.location.hostname
-		this.iconWidget = ''
-		this.closeIconPath = ''
-		this.countryCode = ''
-		this.startMessage = []
-		this.showWelcomeMessage = true
-		this.iconBot = ''
+  constructor(options) {
+    this.agentId = options.agentId;
+    this.contact = options.contact || {};
+    this.userHistory = [];
+    this.initialMessages = options.initialMessages || [];
+    this.context = options.context || "";
+    this.secretChatId = options.secret_chat_id;
+    this.currentUUID = currentUUID;
+    this.chatBotName = options.name_chat_bot;
+    this.domainHostName = window.location.hostname;
+    this.iconWidget = "";
+    this.closeIconPath = "";
+    this.countryCode = "";
+    this.startMessage = [];
+    this.showWelcomeMessage = true;
+    this.iconBot = "";
 
-		this.fetchChatboxConfig()
-	}
+    this.fetchChatboxConfig();
+  }
 
-	setCookie(name, value, days, path = '/', secure = true, sameSite = 'Lax') {
-		const date = new Date()
-		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
-		const expires = 'expires=' + date.toUTCString()
-		const secureFlag = secure ? ';secure' : ''
-		const sameSiteFlag = sameSite ? ';SameSite=' + sameSite : ''
-		document.cookie =
-			name +
-			'=' +
-			value +
-			';' +
-			expires +
-			';path=' +
-			path +
-			secureFlag +
-			sameSiteFlag
-	}
+  setCookie(name, value, days, path = "/", secure = true, sameSite = "Lax") {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    const expires = "expires=" + date.toUTCString();
+    const secureFlag = secure ? ";secure" : "";
+    const sameSiteFlag = sameSite ? ";SameSite=" + sameSite : "";
+    document.cookie =
+      name +
+      "=" +
+      value +
+      ";" +
+      expires +
+      ";path=" +
+      path +
+      secureFlag +
+      sameSiteFlag;
+  }
 
-	getCookie(name) {
-		const nameEQ = name + '='
-		const ca = document.cookie.split(';')
-		for (let i = 0; i < ca.length; i++) {
-			let c = ca[i]
-			while (c.charAt(0) == ' ') c = c.substring(1, c.length)
-			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length)
-		}
-		return null
-	}
+  getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
 
-	async getUserCountry() {
-		try {
-			const response = await fetch(
-				'https://api.chatlix.eu/api/payments/country/',
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				}
-			)
-			const data = await response.json()
-			this.countryCode = data.country_name
-		} catch (error) {
-			console.error('Error fetching user country:', error)
-			return 'US'
-		}
-	}
+  async getUserCountry() {
+    try {
+      const response = await fetch(
+        "https://api.chatlix.eu/api/payments/country/",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      this.countryCode = data.country_name;
+    } catch (error) {
+      console.error("Error fetching user country:", error);
+      return "US";
+    }
+  }
 
-	async getUserConverstationHistort(secret_key, user_uuid) {
-		try {
-			const response = await fetch(
-				'https://api.chatlix.eu/api/chat-bot/history-user-conversation/',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						secret_key: secret_key,
-						user_uuid: user_uuid,
-					}),
-				}
-			)
-			const data = await response.json()
-			this.userHistory = data
-		} catch (error) {
-			console.error('Error fetching user conversation history:', error)
-			return []
-		}
-	}
+  async getUserConverstationHistort(secret_key, user_uuid) {
+    try {
+      const response = await fetch(
+        "https://api.chatlix.eu/api/chat-bot/history-user-conversation/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            secret_key: secret_key,
+            user_uuid: user_uuid,
+          }),
+        }
+      );
+      const data = await response.json();
+      this.userHistory = data;
+    } catch (error) {
+      console.error("Error fetching user conversation history:", error);
+      return [];
+    }
+  }
 
-	getPlaceholderText(countryCode) {
-		switch (countryCode) {
-			case 'SK':
-				return 'Napíšte správu...'
-			case 'CZ':
-				return 'Napište zprávu...'
-			default:
-				return 'Type a message...'
-		}
-	}
+  getPlaceholderText(countryCode) {
+    switch (countryCode) {
+      case "SK":
+        return "Napíšte správu...";
+      case "CZ":
+        return "Napište zprávu...";
+      default:
+        return "Type a message...";
+    }
+  }
 
-	addTypingAnimation(iconUrl) {
-		const typingContainer = document.createElement('div')
-		typingContainer.className = 'chatbox-message-container bot typing-container'
+  addTypingAnimation(iconUrl) {
+    const typingContainer = document.createElement("div");
+    typingContainer.className =
+      "chatbox-message-container bot typing-container";
 
-		// Create a wrapper for the icon
-		const iconWrapper = document.createElement('div')
-		iconWrapper.id = 'icon-wrapper'
+    // Create a wrapper for the icon
+    const iconWrapper = document.createElement("div");
+    iconWrapper.id = "icon-wrapper";
 
-		if (iconUrl) {
-			const icon = document.createElement('img')
-			icon.src = iconUrl
-			icon.className = 'bot-icon'
-			iconWrapper.appendChild(icon)
-		}
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.src = iconUrl;
+      icon.className = "bot-icon";
+      iconWrapper.appendChild(icon);
+    }
 
-		typingContainer.appendChild(iconWrapper)
+    typingContainer.appendChild(iconWrapper);
 
-		const typingDots = `
+    const typingDots = `
       <div class="typing-animation">
         <div class="dot"></div>
         <div class="dot"></div>
         <div class="dot"></div>
       </div>
-    `
-		typingContainer.innerHTML += typingDots // Append typing animation after the icon wrapper
+    `;
+    typingContainer.innerHTML += typingDots; // Append typing animation after the icon wrapper
 
-		this.chatMessages.appendChild(typingContainer)
-		this.chatMessages.scrollTop = this.chatMessages.scrollHeight
-		return typingContainer
-	}
+    this.chatMessages.appendChild(typingContainer);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    return typingContainer;
+  }
 
-	async fetchChatboxConfig(get_data = true) {
-		await this.getUserCountry()
-		let user_uuid
-		if (this.getCookie('user_uuid_key')) {
-			user_uuid = this.getCookie('user_uuid_key')
-		} else {
-			user_uuid = this.currentUUID
-			this.setCookie('user_uuid_key', this.currentUUID, 1)
-		}
-		if (get_data) {
-			await this.getUserConverstationHistort(this.secretChatId, user_uuid)
-		}
+  async fetchChatboxConfig(get_data = true) {
+    await this.getUserCountry();
+    let user_uuid;
+    if (this.getCookie("user_uuid_key")) {
+      user_uuid = this.getCookie("user_uuid_key");
+    } else {
+      user_uuid = this.currentUUID;
+      this.setCookie("user_uuid_key", this.currentUUID, 1);
+    }
+    if (get_data) {
+      await this.getUserConverstationHistort(this.secretChatId, user_uuid);
+    }
 
-		const response = await fetch(
-			'https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/',
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					secret_key: this.secretChatId,
-					user_uuid: user_uuid,
-				}),
-			}
-		)
+    const response = await fetch(
+      "https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          secret_key: this.secretChatId,
+          user_uuid: user_uuid,
+        }),
+      }
+    );
 
-		if (!response.ok) {
-			console.error('Failed to fetch chatbox config')
-			return
-		}
-		const data = await response.json()
-		const {
-			style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
-			start_message,
-			predefined_answers,
-		} = data
-		this.iconBot = icon_bot
-		this.iconWidget = icon_widget
-		this.closeIconPath = closeIconPath
-		this.startMessages = start_message
-			? start_message.map(msg => msg.message)
-			: []
+    if (!response.ok) {
+      console.error("Failed to fetch chatbox config");
+      return;
+    }
+    const data = await response.json();
+    const {
+      style: { icon_bot = agentAvatarPath, icon_widget = logoPath, main_color },
+      start_message,
+      predefined_answers,
+    } = data;
+    this.iconBot = icon_bot;
+    this.iconWidget = icon_widget;
+    this.closeIconPath = closeIconPath;
+    this.startMessages = start_message
+      ? start_message.map((msg) => msg.message)
+      : [];
 
-		this.createChatbox()
-		this.initMessages()
+    this.createChatbox();
+    this.initMessages();
 
-		const sendButton = this.chatboxElement.querySelector('#sendButton img')
-		if (sendButton) {
-			sendButton.style.path = main_color
-		}
+    const sendButton = this.chatboxElement.querySelector("#sendButton img");
+    if (sendButton) {
+      sendButton.style.path = main_color;
+    }
 
-		// Update main color
-		document.documentElement.style.setProperty('--main-color', main_color)
+    // Update main color
+    document.documentElement.style.setProperty("--main-color", main_color);
 
-		// Get elements
-		const chatboxHeader = this.chatboxElement.querySelector('.chatbox-header')
-		const agentAvatar = this.chatboxElement.querySelector('.agent-avatar')
-		const chatButton = this.chatButton
+    // Get elements
+    const chatboxHeader = this.chatboxElement.querySelector(".chatbox-header");
+    const agentAvatar = this.chatboxElement.querySelector(".agent-avatar");
+    const chatButton = this.chatButton;
 
-		// Check if elements exist before updating styles
-		if (chatboxHeader) {
-			chatboxHeader.style.backgroundColor = main_color
-		} else {
-			console.error('.chatbox-header not found')
-		}
+    // Check if elements exist before updating styles
+    if (chatboxHeader) {
+      chatboxHeader.style.backgroundColor = main_color;
+    } else {
+      console.error(".chatbox-header not found");
+    }
 
-		if (agentAvatar) {
-			agentAvatar.src = icon_bot
-		} else {
-			console.error('.agent-avatar not found')
-		}
+    if (agentAvatar) {
+      agentAvatar.src = icon_bot;
+    } else {
+      console.error(".agent-avatar not found");
+    }
 
-		if (chatButton) {
-			chatButton.style.backgroundImage = `url(${icon_widget})`
-			chatButton.style.backgroundSize = '24px 24px'
-			chatButton.style.backgroundPosition = 'center'
-			chatButton.style.backgroundRepeat = 'no-repeat'
-		} else {
-			console.error('#chatButton not found')
-		}
+    if (chatButton) {
+      chatButton.style.backgroundImage = `url(${icon_widget})`;
+      chatButton.style.backgroundSize = "24px 24px";
+      chatButton.style.backgroundPosition = "center";
+      chatButton.style.backgroundRepeat = "no-repeat";
+    } else {
+      console.error("#chatButton not found");
+    }
 
-		// Save bot icon URL
-		this.iconBot = icon_bot
+    // Save bot icon URL
+    this.iconBot = icon_bot;
 
-		// Display start_messages
-		if (this.startMessages.length > 0) {
-			this.startMessages.forEach(msg => {
-				this.addMessage('bot', msg, this.iconBot, false)
-			})
-		}
+    // Display start_messages
+    if (this.startMessages.length > 0) {
+      this.startMessages.forEach((msg) => {
+        this.addMessage("bot", msg, this.iconBot, false);
+      });
+    }
 
-		// Display predefined_answers as buttons
-		if (predefined_answers && predefined_answers.length > 0) {
-			this.displayPredefinedAnswers(predefined_answers)
-		}
-	}
+    // Display predefined_answers as buttons
+    if (predefined_answers && predefined_answers.length > 0) {
+      this.displayPredefinedAnswers(predefined_answers);
+    }
+  }
 
-	formatText(message) {
-		// Handle links: [Link text](url)
-		message = message.replace(
-			/\[([^\]]+)\]\(([^)]+)\)/g,
-			'<a href="$2" target="_blank" class="link-styles">$1</a>'
-		)
+  formatText(message) {
+    // Handle links: [Link text](url) and URLs starting with www
+    message = message.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" class="link-styles">$1</a>'
+    );
 
-		// Handle plain URLs: http or https
-		// message = message.replace(
-		//   /\b(https?:\/\/[^\s]+)\b/g,
-		//   '<a href="$1" target="_blank" class="link-styles">$1</a>'
-		// );
+    // Handle plain URLs: http, https, and www
+    message = message.replace(
+      /(\b(https?:\/\/|www\.)[^\s]+(?:\.[^\s]+)?)/g,
+      function (url) {
+        // Add http:// if it starts with www
+        if (url.startsWith("www")) {
+          return `<a href="http://${url}" target="_blank" class="link-styles">${url}</a>`;
+        }
+        return `<a href="${url}" target="_blank" class="link-styles">${url}</a>`;
+      }
+    );
 
-		// Handle bold text: **text**
-		message = message.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    // Handle bold text: **text**
+    message = message.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
 
-		// // Handle italic text: *text*
-		message = message.replace(/\*(.*?)\*/g, '<i>$1</i>')
+    // Handle italic text: *text*
+    message = message.replace(/\*(.*?)\*/g, "<i>$1</i>");
 
-		// // Handle headings: # Heading
-		message = message.replace(/^#\s(.*$)/gm, '<h1>$1</h1>')
+    // Handle headings: # Heading
+    message = message.replace(/^#\s(.*$)/gm, "<h1>$1</h1>");
 
-		// // Handle inline code: `code`
-		message = message.replace(/`(.*?)`/g, '<code>$1</code>')
+    // Handle inline code: `code`
+    message = message.replace(/`(.*?)`/g, "<code>$1</code>");
 
-		// // Handle blockquotes: > Quote
-		message = message.replace(/^\s*>\s(.*)$/gm, '<blockquote>$1</blockquote>')
+    // Handle blockquotes: > Quote
+    message = message.replace(/^\s*>\s(.*)$/gm, "<blockquote>$1</blockquote>");
 
-		// // Handle unordered list: - List item
-		message = message.replace(/^\s*-\s(.*)$/gm, '<li>$1</li>')
-		message = message.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>')
-		message = message.replace(/<\/ul>\s*<ul>/g, '')
+    // Handle unordered list: - List item
+    message = message.replace(/^\s*-\s(.*)$/gm, "<li>$1</li>");
+    message = message.replace(/(<li>.*<\/li>)/gms, "<ul>$1</ul>");
+    message = message.replace(/<\/ul>\s*<ul>/g, "");
 
-		// // Handle ordered list: 1. List item
-		message = message.replace(/^\s*\d+\.\s(.*)$/gm, '<li>$1</li>')
-		message = message.replace(/(<li>.*<\/li>)/gms, '<ol>$1</ol>')
-		message = message.replace(/<\/ol>\s*<ol>/g, '')
+    // Handle ordered list: 1. List item
+    message = message.replace(/^\s*\d+\.\s(.*)$/gm, "<li>$1</li>");
+    message = message.replace(/(<li>.*<\/li>)/gms, "<ol>$1</ol>");
+    message = message.replace(/<\/ol>\s*<ol>/g, "");
 
-		return message
-	}
+    return message;
+  }
 
-	createChatbox() {
-		const existingChatbox = document.querySelector('.chatbox-container')
-		if (existingChatbox) {
-			existingChatbox.remove()
-		}
-		this.chatboxElement = document.createElement('div')
-		this.chatboxElement.className = 'chatbox-container'
-		this.chatboxElement.innerHTML = `
+  createChatbox() {
+    const existingChatbox = document.querySelector(".chatbox-container");
+    if (existingChatbox) {
+      existingChatbox.remove();
+    }
+    this.chatboxElement = document.createElement("div");
+    this.chatboxElement.className = "chatbox-container";
+    this.chatboxElement.innerHTML = `
       <div class="chatbox-header" id="chatbox-header">
         <div class="chatbox-header-buttons" id="chatbox-header-buttons">
           <button class="reload-button" id="reload-button"><img src="${reload}" alt="Reload"></button>
@@ -307,388 +313,389 @@ class Chatbox {
       <div class="chatbox-footer" id="chatbox-footer">
         <span>Powered by <a href="https://chatlix.eu" class="chatbox-footer-link" id="chatbox-footer-link">Chatlix.eu</a></span>
       </div>
-    `
+    `;
 
-		this.chatButton = document.createElement('button')
-		this.chatButton.id = 'chatButton'
-		this.chatButton.className = 'chatbox-chat-button'
-		document.body.appendChild(this.chatButton)
+    this.chatButton = document.createElement("button");
+    this.chatButton.id = "chatButton";
+    this.chatButton.className = "chatbox-chat-button";
+    document.body.appendChild(this.chatButton);
 
-		document.body.appendChild(this.chatboxElement)
+    document.body.appendChild(this.chatboxElement);
 
-		this.chatMessages = this.chatboxElement.querySelector('#chatMessages')
-		this.chatInput = this.chatboxElement.querySelector('#chatInput')
-		this.sendButton = this.chatboxElement.querySelector('#sendButton')
-		this.closeButton = this.chatboxElement.querySelector('#close-button')
-		this.reloadButton = this.chatboxElement.querySelector('#reload-button')
+    this.chatMessages = this.chatboxElement.querySelector("#chatMessages");
+    this.chatInput = this.chatboxElement.querySelector("#chatInput");
+    this.sendButton = this.chatboxElement.querySelector("#sendButton");
+    this.closeButton = this.chatboxElement.querySelector("#close-button");
+    this.reloadButton = this.chatboxElement.querySelector("#reload-button");
 
-		this.sendButton.addEventListener('click', () => this.sendMessage())
+    this.sendButton.addEventListener("click", () => this.sendMessage());
 
-		this.chatInput.addEventListener('keypress', e => {
-			if (e.key === 'Enter' && !e.shiftKey) {
-				if (this.chatInput.value.trim() === '') {
-					e.preventDefault()
-				} else {
-					e.preventDefault()
-					this.sendMessage()
-					this.chatInput.value = ''
-				}
-			} else if (e.key === 'Enter' && e.shiftKey) {
-				e.preventDefault()
-				let textarea = e.target
-				let cursorPosition = textarea.selectionStart
-				let textBeforeCursor = textarea.value.substring(0, cursorPosition)
-				let textAfterCursor = textarea.value.substring(cursorPosition)
-				textarea.value = textBeforeCursor + '\n' + textAfterCursor
-				textarea.selectionStart = cursorPosition + 1
-				textarea.selectionEnd = cursorPosition + 1
-			}
-		})
+    this.chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        if (this.chatInput.value.trim() === "") {
+          e.preventDefault();
+        } else {
+          e.preventDefault();
+          this.sendMessage();
+          this.chatInput.value = "";
+        }
+      } else if (e.key === "Enter" && e.shiftKey) {
+        e.preventDefault();
+        let textarea = e.target;
+        let cursorPosition = textarea.selectionStart;
+        let textBeforeCursor = textarea.value.substring(0, cursorPosition);
+        let textAfterCursor = textarea.value.substring(cursorPosition);
+        textarea.value = textBeforeCursor + "\n" + textAfterCursor;
+        textarea.selectionStart = cursorPosition + 1;
+        textarea.selectionEnd = cursorPosition + 1;
+      }
+    });
 
-		this.chatInput.addEventListener('keyup', e => {
-			if (e.key === 'Enter') {
-				this.chatInput.placeholder = 'Type a message...'
-			}
-		})
+    this.chatInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        this.chatInput.placeholder = "Type a message...";
+      }
+    });
 
-		this.reloadButton.addEventListener('click', () => this.reloadChatbox())
+    this.reloadButton.addEventListener("click", () => this.reloadChatbox());
 
-		this.chatboxElement.style.display = 'none'
+    this.chatboxElement.style.display = "none";
 
-		this.chatInput.placeholder = this.getPlaceholderText(this.countryCode)
+    this.chatInput.placeholder = this.getPlaceholderText(this.countryCode);
 
-		if (this.showWelcomeMessage && !this.getCookie('is_closed_hello_message')) {
-			const startMessagesContainer = document.createElement('div')
-			startMessagesContainer.id = 'startMessagesContainerId'
-			startMessagesContainer.className = 'start-messages-container'
-			document.body.appendChild(startMessagesContainer)
+    if (this.showWelcomeMessage && !this.getCookie("is_closed_hello_message")) {
+      const startMessagesContainer = document.createElement("div");
+      startMessagesContainer.id = "startMessagesContainerId";
+      startMessagesContainer.className = "start-messages-container";
+      document.body.appendChild(startMessagesContainer);
 
-			this.startMessages.forEach((message, index) => {
-				const startMessageBlock = document.createElement('div')
-				startMessageBlock.id = `startMessageBlock${index}`
-				startMessageBlock.className = 'start-message-block'
-				console.log('messa', message)
-				startMessageBlock.innerHTML = `
+      this.startMessages.forEach((message, index) => {
+        const startMessageBlock = document.createElement("div");
+        startMessageBlock.id = `startMessageBlock${index}`;
+        startMessageBlock.className = "start-message-block";
+        startMessageBlock.innerHTML = `
           <div class="start-message-relative" id="start-message-relative">
             <div class="start-message-bot" id="start-message${index}">${message}</div>
             ${
-							index === 0
-								? `
+              index === 0
+                ? `
               <button class="close-start-message" id="close-start-message"><img src="${closeIconPath}" alt="Close"></button>
               `
-								: ''
-						}
+                : ""
+            }
           </div>
-        `
+        `;
 
-				startMessagesContainer.appendChild(startMessageBlock)
+        startMessagesContainer.appendChild(startMessageBlock);
 
-				const startMessageBlockId = document.getElementById(
-					'startMessagesContainerId'
-				)
+        const startMessageBlockId = document.getElementById(
+          "startMessagesContainerId"
+        );
 
-				if (index === 0) {
-					const closeStartMessageButton = startMessageBlock.querySelector(
-						'.close-start-message'
-					)
+        if (index === 0) {
+          const closeStartMessageButton = startMessageBlock.querySelector(
+            ".close-start-message"
+          );
 
-					closeStartMessageButton.addEventListener('click', event => {
-						event.stopPropagation()
-						this.showWelcomeMessage = false
-						startMessageBlockId.style.display = 'none'
-						this.setCookie('is_closed_hello_message', true, 1)
-					})
+          closeStartMessageButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            this.showWelcomeMessage = false;
+            startMessageBlockId.style.display = "none";
+            this.setCookie("is_closed_hello_message", true, 1);
+          });
 
-					startMessageBlockId.addEventListener('click', () => {
-						startMessageBlockId.style.display = 'none'
-						this.openChatbox()
-					})
+          startMessageBlockId.addEventListener("click", () => {
+            startMessageBlockId.style.display = "none";
+            this.openChatbox();
+          });
 
-					const startMessageBlockIcon = startMessageBlock.querySelector(
-						'#start-message-avatar'
-					)
+          const startMessageBlockIcon = startMessageBlock.querySelector(
+            "#start-message-avatar"
+          );
 
-					if (startMessageBlockIcon) {
-						startMessageBlockIcon.addEventListener('click', () => {
-							startMessageBlockId.style.display = 'none'
-							this.openChatbox()
-						})
-					}
-				}
+          if (startMessageBlockIcon) {
+            startMessageBlockIcon.addEventListener("click", () => {
+              startMessageBlockId.style.display = "none";
+              this.openChatbox();
+            });
+          }
+        }
 
-				const startMessage1 = document.getElementById('start-message1')
-				const startMessage2 = document.getElementById('start-message2')
-				const startMessage3 = document.getElementById('start-message3')
-				const startMessage4 = document.getElementById('start-message4')
+        const startMessage1 = document.getElementById("start-message1");
+        const startMessage2 = document.getElementById("start-message2");
+        const startMessage3 = document.getElementById("start-message3");
+        const startMessage4 = document.getElementById("start-message4");
 
-				if (startMessage1) {
-					startMessage1.style.marginLeft = '65px'
-				}
+        if (startMessage1) {
+          startMessage1.style.marginLeft = "65px";
+        }
 
-				if (startMessage2) {
-					startMessage2.style.marginLeft = '65px'
-				}
+        if (startMessage2) {
+          startMessage2.style.marginLeft = "65px";
+        }
 
-				if (startMessage3) {
-					startMessage3.style.marginLeft = '65px'
-				}
+        if (startMessage3) {
+          startMessage3.style.marginLeft = "65px";
+        }
 
-				if (startMessage4) {
-					startMessage4.style.marginLeft = '65px'
-				}
-			})
-		}
+        if (startMessage4) {
+          startMessage4.style.marginLeft = "65px";
+        }
+      });
+    }
 
-		this.chatButton.addEventListener('click', () => {
-			if (this.chatboxElement.style.display === 'none') {
-				const startMessageBlockId = document.getElementById(
-					'startMessagesContainerId'
-				)
-				this.openChatbox()
-				if (startMessageBlockId) {
-					startMessageBlockId.style.display = 'none'
-				}
-			} else {
-				this.closeChatbox()
-			}
-		})
-	}
+    this.chatButton.addEventListener("click", () => {
+      if (this.chatboxElement.style.display === "none") {
+        const startMessageBlockId = document.getElementById(
+          "startMessagesContainerId"
+        );
+        this.openChatbox();
+        if (startMessageBlockId) {
+          startMessageBlockId.style.display = "none";
+        }
+      } else {
+        this.closeChatbox();
+      }
+    });
+  }
 
-	openChatbox() {
-		const startMessageBlockId = document.getElementById(
-			'startMessagesContainerId'
-		)
-		if (startMessageBlockId) {
-			startMessageBlockId.style.display = 'none'
-		}
-		this.chatboxElement.style.display = 'flex'
-		this.chatButton.style.backgroundImage = `url(${closeIconPath})`
-		if (this.userHistory) {
-			for (let i = 0; i < this.userHistory.length; i++) {
-				this.addMessage(
-					'user',
-					this.userHistory[i]['messages'],
-					undefined,
-					false
-				)
-				this.addMessage(
-					'bot',
-					this.formatText(this.userHistory[i]['chat_answer']),
-					this.iconBot,
-					false
-				)
-			}
-			this.userHistory = []
-		}
-	}
+  openChatbox() {
+    const startMessageBlockId = document.getElementById(
+      "startMessagesContainerId"
+    );
+    if (startMessageBlockId) {
+      startMessageBlockId.style.display = "none";
+    }
+    this.chatboxElement.style.display = "flex";
+    this.chatButton.style.backgroundImage = `url(${closeIconPath})`;
+    if (this.userHistory) {
+      for (let i = 0; i < this.userHistory.length; i++) {
+        this.addMessage(
+          "user",
+          this.userHistory[i]["messages"],
+          undefined,
+          false
+        );
+        this.addMessage(
+          "bot",
+          this.formatText(this.userHistory[i]["chat_answer"]),
+          this.iconBot,
+          false
+        );
+      }
+      this.userHistory = [];
+    }
+  }
 
-	closeChatbox() {
-		const startMessageBlockId = document.getElementById(
-			'startMessagesContainerId'
-		)
-		if (startMessageBlockId && this.showWelcomeMessage) {
-			startMessageBlockId.style.display = 'flex'
-		}
+  closeChatbox() {
+    const startMessageBlockId = document.getElementById(
+      "startMessagesContainerId"
+    );
+    if (startMessageBlockId && this.showWelcomeMessage) {
+      startMessageBlockId.style.display = "flex";
+    }
 
-		this.chatboxElement.style.display = 'none'
-		this.chatButton.style.backgroundImage = `url(${this.iconWidget})`
-		this.chatButton.style.backgroundSize = '28px 28px'
-		this.chatButton.style.backgroundPosition = 'center'
-		this.chatButton.style.backgroundRepeat = 'no-repeat'
-	}
+    this.chatboxElement.style.display = "none";
+    this.chatButton.style.backgroundImage = `url(${this.iconWidget})`;
+    this.chatButton.style.backgroundSize = "28px 28px";
+    this.chatButton.style.backgroundPosition = "center";
+    this.chatButton.style.backgroundRepeat = "no-repeat";
+  }
 
-	reloadChatbox() {
-		this.chatMessages.innerHTML = ''
-		this.showWelcomeMessage = false
-		this.fetchChatboxConfig(false).then(() => {
-			this.openChatbox()
-		})
-		this.setCookie('user_uuid_key', currentUUID, 1)
-		this.initMessages()
-	}
+  reloadChatbox() {
+    this.chatMessages.innerHTML = "";
+    this.showWelcomeMessage = false;
+    this.fetchChatboxConfig(false).then(() => {
+      this.openChatbox();
+    });
+    this.setCookie("user_uuid_key", currentUUID, 1);
+    this.initMessages();
+  }
 
-	initMessages() {
-		this.initialMessages.forEach(message => {
-			this.addMessage('bot', message)
-		})
-	}
+  initMessages() {
+    this.initialMessages.forEach((message) => {
+      this.addMessage("bot", message);
+    });
+  }
 
-	addMessage(from, message, iconUrl, show_animation = true) {
-		console.log(from, message)
-		const messageContainer = document.createElement('div')
-		messageContainer.className = `chatbox-message-container ${from}`
+  addMessage(from, message, iconUrl, show_animation = true) {
+    const messageContainer = document.createElement("div");
+    messageContainer.className = `chatbox-message-container ${from}`;
 
-		if (from === 'bot' && iconUrl) {
-			const wrapper = document.createElement('div')
-			wrapper.id = 'icon-wrapper'
+    if (from === "bot" && iconUrl) {
+      const wrapper = document.createElement("div");
+      wrapper.id = "icon-wrapper";
 
-			const icon = document.createElement('img')
-			icon.src = iconUrl
-			icon.className = 'bot-icon'
+      const icon = document.createElement("img");
+      icon.src = iconUrl;
+      icon.className = "bot-icon";
 
-			wrapper.appendChild(icon)
-			messageContainer.appendChild(wrapper)
-		}
+      wrapper.appendChild(icon);
+      messageContainer.appendChild(wrapper);
+    }
 
-		const messageElement = document.createElement('div')
-		messageElement.className = `chatbox-message ${from}`
+    const messageElement = document.createElement("div");
+    messageElement.className = `chatbox-message ${from}`;
 
-		// Check if the message contains ul, ol, li
-		const containsLists = /<ul|<ol|<li/.test(message)
+    // Check if the message contains ul, ol, li
+    const containsLists = /<ul|<ol|<li/.test(message);
 
-		if (from === 'bot' && containsLists) {
-			messageElement.style.padding = '0'
-		} else {
-			messageElement.style.padding = '5px 10px'
-		}
-		if (show_animation) {
-			if (from == 'bot') {
-				const speed = 25 // Speed of typing in milliseconds
-				let i = 0
-				let html_tag_key = false
-				let current_tag = ''
+    if (from === "bot" && containsLists) {
+      messageElement.style.padding = "0";
+    } else {
+      messageElement.style.padding = "5px 10px";
+    }
+    if (show_animation) {
+      if (from == "bot") {
+        const speed = 25; // Speed of typing in milliseconds
+        let i = 0;
+        let html_tag_key = false;
+        let current_tag = "";
 
-				const type = () => {
-					if (i < message.length) {
-						if (message.charAt(i) === '<' || html_tag_key) {
-							html_tag_key = true
-							current_tag += message.charAt(i)
+        const type = () => {
+          if (i < message.length) {
+            if (message.charAt(i) === "<" || html_tag_key) {
+              html_tag_key = true;
+              current_tag += message.charAt(i);
 
-							if (message.charAt(i) === '>') {
-								html_tag_key = false
-								current_tag = '' // Reset the tag buffer
-							}
+              if (message.charAt(i) === ">") {
+                html_tag_key = false;
+                current_tag = ""; // Reset the tag buffer
+              }
 
-							i++
-							setTimeout(type, speed)
-						} else {
-							messageElement.innerHTML += message.charAt(i)
-							i++
-							setTimeout(type, speed)
-						}
-					} else {
-						// If the message contains HTML elements, display them properly after typing completes
-						messageElement.innerHTML = message
-					}
-				}
-				type()
-			} else {
-				messageElement.innerHTML = message
-			}
-		} else {
-			messageElement.innerHTML = message
-		}
+              i++;
+              setTimeout(type, speed);
+            } else {
+              messageElement.innerHTML += message.charAt(i);
+              i++;
+              setTimeout(type, speed);
+            }
+          } else {
+            // If the message contains HTML elements, display them properly after typing completes
+            messageElement.innerHTML = message;
+          }
+        };
+        type();
+      } else {
+        messageElement.innerHTML = message;
+      }
+    } else {
+      messageElement.innerHTML = message;
+    }
 
-		messageContainer.appendChild(messageElement)
-		this.chatMessages.appendChild(messageContainer)
-		this.chatMessages.scrollTop = this.chatMessages.scrollHeight
-	}
+    messageContainer.appendChild(messageElement);
+    this.chatMessages.appendChild(messageContainer);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  }
 
-	displayPredefinedAnswers(answers) {
-		answers.forEach(answer => {
-			const button = document.createElement('button')
-			button.className = 'chatbox-predefined-answer'
-			button.innerText = answer.question
-			button.addEventListener('click', () => {
-				this.handlePredefinedAnswerClick(answer)
-			})
-			this.chatMessages.appendChild(button)
-		})
-	}
+  displayPredefinedAnswers(answers) {
+    answers.forEach((answer) => {
+      const button = document.createElement("button");
+      button.className = "chatbox-predefined-answer";
+      button.innerText = answer.question;
+      button.addEventListener("click", () => {
+        this.handlePredefinedAnswerClick(answer);
+      });
+      this.chatMessages.appendChild(button);
+    });
+  }
 
-	async handlePredefinedAnswerClick(answer) {
-		this.addMessage('user', answer.question)
+  async handlePredefinedAnswerClick(answer) {
+    this.addMessage("user", answer.question);
 
-		// Add typing animation
-		const typingContainer = this.addTypingAnimation()
+    // Додати анімацію друку
+    const typingContainer = this.addTypingAnimation();
 
-		// Simulate delay for typing animation
-		await new Promise(resolve => setTimeout(resolve, 1000))
+    // Імітувати затримку для анімації друку
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		// Remove typing animation
-		typingContainer.remove()
+    // Видалити анімацію друку
+    typingContainer.remove();
 
-		this.addMessage('bot', answer.answer, this.iconBot)
-	}
+    // Форматувати відповідь бота перед відображенням
+    const formattedAnswer = this.formatText(answer.answer);
 
-	async sendMessage() {
-		const message = this.chatInput.value
-		if (!message) return
+    this.addMessage("bot", formattedAnswer, this.iconBot);
+  }
 
-		this.addMessage('user', message)
-		this.chatInput.value = ''
-		this.chatInput.focus()
+  async sendMessage() {
+    const message = this.chatInput.value;
+    if (!message) return;
 
-		// Add typing animation with bot icon
-		const typingContainer = this.addTypingAnimation(this.iconBot)
+    this.addMessage("user", message);
+    this.chatInput.value = "";
+    this.chatInput.focus();
 
-		const botResponse = await this.getBotResponse(
-			this.secretChatId,
-			message,
-			this.domainHostName
-		)
+    // Add typing animation with bot icon
+    const typingContainer = this.addTypingAnimation(this.iconBot);
 
-		const formattedResponse = this.formatText(botResponse)
+    const botResponse = await this.getBotResponse(
+      this.secretChatId,
+      message,
+      this.domainHostName
+    );
 
-		// Remove typing animation
-		typingContainer.remove()
+    const formattedResponse = this.formatText(botResponse);
 
-		this.addMessage('bot', formattedResponse, this.iconBot)
-	}
+    // Remove typing animation
+    typingContainer.remove();
 
-	async getBotResponse(secretKey, message, domain) {
-		try {
-			let user_uuid
-			if (this.getCookie('user_uuid_key')) {
-				user_uuid = this.getCookie('user_uuid_key')
-			} else {
-				user_uuid = this.currentUUID
-				this.setCookie('user_uuid_key', this.currentUUID, 1)
-			}
-			const response = await fetch(
-				'https://api.chatlix.eu/api/chat-bot/do-request-chat-gpt/',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						secret_key: secretKey,
-						message: message,
-						user_uuid: user_uuid,
-						domain: domain,
-						country: this.countryCode,
-					}),
-				}
-			)
+    this.addMessage("bot", formattedResponse, this.iconBot);
+  }
 
-			if (!response.ok) {
-				throw new Error(`Server error: ${response.statusText}`)
-			}
-			const data = await response.json()
+  async getBotResponse(secretKey, message, domain) {
+    try {
+      let user_uuid;
+      if (this.getCookie("user_uuid_key")) {
+        user_uuid = this.getCookie("user_uuid_key");
+      } else {
+        user_uuid = this.currentUUID;
+        this.setCookie("user_uuid_key", this.currentUUID, 1);
+      }
+      const response = await fetch(
+        "https://api.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            secret_key: secretKey,
+            message: message,
+            user_uuid: user_uuid,
+            domain: domain,
+            country: this.countryCode,
+          }),
+        }
+      );
 
-			if (
-				data.detail &&
-				data.detail === 'chat requests cannot be sent from this domain'
-			) {
-				return data.detail
-			}
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+      const data = await response.json();
 
-			return data.response
-		} catch (error) {
-			console.error('Failed to get bot response:', error)
-			return "Sorry, I couldn't process your request at the moment."
-		}
-	}
+      if (
+        data.detail &&
+        data.detail === "chat requests cannot be sent from this domain"
+      ) {
+        return data.detail;
+      }
+
+      return data.response;
+    } catch (error) {
+      console.error("Failed to get bot response:", error);
+      return "Sorry, I couldn't process your request at the moment.";
+    }
+  }
 }
 
 // Initialize chatbox
 export function initBubble(options) {
-	new Chatbox(options)
+  new Chatbox(options);
 }
 
 // Add styles to match the provided screenshot
-const styles = document.createElement('style')
+const styles = document.createElement("style");
 styles.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
       :root {
@@ -793,7 +800,7 @@ styles.innerHTML = `
       #send-button {
          width: 18px;
          height: 18px;
-         margin-top: 5px;
+         margin-top: 6px;
         }
 
       #chatBotName {
@@ -907,8 +914,8 @@ styles.innerHTML = `
         cursor: pointer;
         border-radius: 8px;
         position: absolute;
-        right: 32px;
-        top: 20px;
+        right: 28px;
+        top: 24px;
         padding: initial;
       }
     
@@ -1034,17 +1041,6 @@ styles.innerHTML = `
         height: 24px;
       }
 
-      // .typing-animation {
-      //   display: flex;
-      //   align-items: center;
-      //   justify-content: center;
-      //   background-color: var(--main-color);
-      //   max-height: 100px;
-      //   padding: 0px 15px 0px 15px !important;
-      //   border-radius: 4px;
-      //   gap: 5px;
-    
-      // }
       .typing-animation {
         display: flex;
         align-items: center;
@@ -1108,7 +1104,7 @@ styles.innerHTML = `
           bottom: 20px;
         }
       }
-    `
-document.head.appendChild(styles)
+    `;
+document.head.appendChild(styles);
 
 //<img src="${agentAvatarPath}" alt="Agent" class="agent-avatar"> inside class chatbox-header-avatar-wrapper before name
