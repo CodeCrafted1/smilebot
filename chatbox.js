@@ -62,7 +62,7 @@ class Chatbox {
   async getUserCountry() {
     try {
       const response = await fetch(
-        "https://api.chatlix.eu/api/payments/country/",
+        "https://apiv1.chatlix.eu/api/payments/country/",
         {
           method: "GET",
           headers: {
@@ -81,7 +81,7 @@ class Chatbox {
   async getUserConverstationHistort(secret_key, user_uuid) {
     try {
       const response = await fetch(
-        "https://api.chatlix.eu/api/chat-bot/history-user-conversation/",
+        "https://apiv1.chatlix.eu/api/chat-bot/history-user-conversation/",
         {
           method: "POST",
           headers: {
@@ -158,7 +158,7 @@ class Chatbox {
     }
 
     const response = await fetch(
-      "https://api.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
+      "https://apiv1.chatlix.eu/api/chat-bot/get-style-predifened-answer/",
       {
         method: "POST",
         headers: {
@@ -243,26 +243,15 @@ class Chatbox {
   }
 
   formatText(message) {
-    // Handle links: [Link text](url) and URLs starting with www
-    // message = message.replace(
-    //   /\[([^\]]+)\]\(([^)]+)\)/g,
-    //   '<a href="$2" target="_blank" class="link-styles">$1</a>'
-    // );
+    const removeBrackets = message.replace(/\[[^\]]*\]/g, "");
 
-    console.log(message, "message");
+    const cleanedText = removeBrackets.replace(/\(([^)]+)\)/g, "$1");
 
-    // Handle plain URLs: http, https, and www
-    message = message.replace(
+    message = cleanedText.replace(
       /(\b(https?:\/\/|www\.)[^\s]+(?:\.[^\s]+)?)/g,
       function (url) {
-        console.log(url, "url");
+        const trimmedUrl = url.replace(/[).]+$/, "");
 
-        // Очищення початку та кінця URL
-        const trimmedUrl = url
-          .replace(/^[^a-zA-Z0-9]+/, "") // Видаляємо непотрібні символи на початку
-          .replace(/[).]+$/, ""); // Видаляємо символи ")" і "." в кінці
-
-        // Додаємо http://, якщо URL починається з www
         if (trimmedUrl.startsWith("www")) {
           return `<a href="https://${trimmedUrl}" target="_blank" class="link-styles">${trimmedUrl}</a>`;
         }
@@ -663,7 +652,7 @@ class Chatbox {
         this.setCookie("user_uuid_key", this.currentUUID, 1);
       }
       const response = await fetch(
-        "https://api.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
+        "https://apiv1.chatlix.eu/api/chat-bot/do-request-chat-gpt/",
         {
           method: "POST",
           headers: {
