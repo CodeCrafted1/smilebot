@@ -244,20 +244,30 @@ class Chatbox {
 
   formatText(message) {
     // Handle links: [Link text](url) and URLs starting with www
-    message = message.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" class="link-styles">$1</a>'
-    );
+    // message = message.replace(
+    //   /\[([^\]]+)\]\(([^)]+)\)/g,
+    //   '<a href="$2" target="_blank" class="link-styles">$1</a>'
+    // );
+
+    console.log(message, "message");
 
     // Handle plain URLs: http, https, and www
     message = message.replace(
       /(\b(https?:\/\/|www\.)[^\s]+(?:\.[^\s]+)?)/g,
       function (url) {
-        // Add http:// if it starts with www
-        if (url.startsWith("www")) {
-          return `<a href="http://${url}" target="_blank" class="link-styles">${url}</a>`;
+        console.log(url, "url");
+
+        // Очищення початку та кінця URL
+        const trimmedUrl = url
+          .replace(/^[^a-zA-Z0-9]+/, "") // Видаляємо непотрібні символи на початку
+          .replace(/[).]+$/, ""); // Видаляємо символи ")" і "." в кінці
+
+        // Додаємо http://, якщо URL починається з www
+        if (trimmedUrl.startsWith("www")) {
+          return `<a href="https://${trimmedUrl}" target="_blank" class="link-styles">${trimmedUrl}</a>`;
         }
-        return `<a href="${url}" target="_blank" class="link-styles">${url}</a>`;
+
+        return `<a href="${trimmedUrl}" target="_blank" class="link-styles">${trimmedUrl}</a>`;
       }
     );
 
@@ -270,7 +280,7 @@ class Chatbox {
     // Handle headings: # Heading
     message = message.replace(/^#\s(.*$)/gm, "<h1>$1</h1>");
 
-    // Handle inline code: `code`
+    // Handle inline code: code
     message = message.replace(/`(.*?)`/g, "<code>$1</code>");
 
     // Handle blockquotes: > Quote
