@@ -219,7 +219,7 @@ class Chatbox {
 
     if (chatButton) {
       chatButton.style.backgroundImage = `url(${icon_widget})`;
-      chatButton.style.backgroundSize = "24px 24px";
+      chatButton.style.backgroundSize = "30px 30px";
       chatButton.style.backgroundPosition = "center";
       chatButton.style.backgroundRepeat = "no-repeat";
     } else {
@@ -550,7 +550,6 @@ class Chatbox {
         let i = 0;
         let html_tag_key = false;
         let current_tag = "";
-
         const type = () => {
           if (i < message.length) {
             if (message.charAt(i) === "<" || html_tag_key) {
@@ -565,6 +564,9 @@ class Chatbox {
               i++;
               setTimeout(type, speed);
             } else {
+              if (i + 1 == message.length || (i + 1) % 120 == 0) {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+              }
               messageElement.innerHTML += message.charAt(i);
               i++;
               setTimeout(type, speed);
@@ -602,16 +604,16 @@ class Chatbox {
   async handlePredefinedAnswerClick(answer) {
     this.addMessage("user", answer.question);
 
-    // Додати анімацію друку
+    // Add animation
     const typingContainer = this.addTypingAnimation();
 
-    // Імітувати затримку для анімації друку
+    // Typing delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Видалити анімацію друку
+    // Delete animation
     typingContainer.remove();
 
-    // Форматувати відповідь бота перед відображенням
+    // Text formatter before answer
     const formattedAnswer = this.formatText(answer.answer);
 
     this.addMessage("bot", formattedAnswer, this.iconBot);
@@ -723,7 +725,7 @@ styles.innerHTML = `
 
       @media screen and (max-width: 440px) {
         .start-messages-container{
-           bottom: 80px;
+           bottom: 65px;
            right: 20px;
         }
       }
@@ -940,7 +942,7 @@ styles.innerHTML = `
   
       .chatbox-footer-link{
           text-decoration: none;
-          color: rgba(239, 77, 7, 1);
+          color: rgba(239, 77, 7, 1) !important;
       }
     
       .chatbox-chat-button {
@@ -1015,7 +1017,7 @@ styles.innerHTML = `
         color: white;
         border: none;
         padding: 5px 10px !important;
-        margin: 5px;
+        margin: 5px 5px 20px 5px;
         border-radius: 4px;
         cursor: pointer;
         font-size: 15px !important;
@@ -1048,7 +1050,7 @@ styles.innerHTML = `
         max-height: 30px;
         padding: 6px 15px 0px 15px !important;
         border-radius: 4px;
-        margin-top: 15px;
+        margin-top: 7px;
         gap: 5px;
     }
     
@@ -1101,6 +1103,7 @@ styles.innerHTML = `
           width: 50px;
           right: 20px;
           bottom: 20px;
+          background-size: 22px 22px !important;
         }
       }
     `;
